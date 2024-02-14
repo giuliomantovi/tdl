@@ -2,8 +2,11 @@
 
 """This module defines project-level constants."""
 
-#Absolute path to dir containing input audio
-INPUT_AUDIO = "C:/Users/Utente/OneDrive/Desktop/lazza.m4a"
+#relative path to dir containing input audio
 
-#Absolute path to dir that stores separated audios
-OUTPUT_AUDIO = "C:/Users/Utente/OneDrive/Desktop/output"
+INPUT_AUDIO = "Config/input_audio/lazza.m4a"
+
+#relative path to dir that stores separated audios
+
+OUTPUT_AUDIO = "Config/output_audio"
+
