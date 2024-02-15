@@ -2,9 +2,9 @@
 from Config import Constants
 from spleeter.separator import Separator
 from faster_whisper import WhisperModel
-import os
-
-os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+import whisper
+#import os
+#os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -30,16 +30,10 @@ def fast_transcript():
 
     for segment in segments:
         print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
-    # WHISPER AI WITHOUT CUDA
-    # model = whisper.load_model("base")
-    # result = model.transcribe(Constants.INPUT_AUDIO)
-    # with (open("Config/output_audio/transcription.txt", "w") as f):
-    #    f.write(result["text"])
-
 
 def slow_transcript():
     # WHISPER AI WITHOUT CUDA
-    model = whisper.load_model("base")
+    model = whisper.load_model("medium")
     result = model.transcribe(Constants.INPUT_AUDIO)
     with (open("Config/output_audio/transcription.txt", "w") as f):
         f.write(result["text"])
