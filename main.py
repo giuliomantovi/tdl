@@ -1,9 +1,8 @@
-#
+import microphone_input
 from Config import Constants
 from spleeter.separator import Separator
 from faster_whisper import WhisperModel
 import whisper
-
 
 # import os
 # os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
@@ -11,11 +10,9 @@ import whisper
 
 # warnings.filterwarnings('ignore')
 
-
 def source_separation():
     separator = Separator('spleeter:5stems')
     separator.separate_to_file(Constants.INPUT_AUDIO, Constants.OUTPUT_AUDIO)
-
 
 def fast_transcript():
     model_size = "small"
@@ -67,4 +64,5 @@ def low_level_transcript():
 
 if __name__ == '__main__':
     #source_separation()
-    simple_transcript()
+    #simple_transcript()
+    microphone_input.record()
