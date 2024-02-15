@@ -3,11 +3,13 @@ from Config import Constants
 from spleeter.separator import Separator
 from faster_whisper import WhisperModel
 import whisper
-#import os
-#os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
-import warnings
 
-warnings.filterwarnings('ignore')
+
+# import os
+# os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+# import warnings
+
+# warnings.filterwarnings('ignore')
 
 
 def source_separation():
@@ -31,14 +33,38 @@ def fast_transcript():
     for segment in segments:
         print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
 
-def slow_transcript():
-    # WHISPER AI WITHOUT CUDA
-    model = whisper.load_model("medium")
-    result = model.transcribe(Constants.INPUT_AUDIO)
-    with (open("Config/output_audio/transcription.txt", "w") as f):
-        f.write(result["text"])
 
+def simple_transcript():
+    # WHISPER AI WITHOUT CUDA
+    model = whisper.load_model("base", download_root="whisper_models", in_memory=True)
+
+    result = model.transcribe("Config/output_audio/lazza/vocals.wav")
+    with (open("Config/output_audio/transcription.txt", "w") as f):
+        print(result["text"])
+        #f.write(result["text"])
+
+def low_level_transcript():
+    model = whisper.load_model("base", download_root="whisper_models", in_memory=True)
+
+    # load audio and pad/trim it to fit 30 seconds
+    audio = whisper.load_audio("Config/output_audio/lazza/vocals.wav")
+    audio = whisper.pad_or_trim(audio)
+
+    # make log-Mel spectrogram and move to the same device as the model
+    print("model device: "+model.device.__str__())
+    mel = whisper.log_mel_spectrogram(audio).to(model.device)
+
+    # detect the spoken language
+    _, probs = model.detect_language(mel)
+    print(f"Detected language: {max(probs, key=probs.get)}")
+
+    # decode the audio
+    options = whisper.DecodingOptions()
+    result = whisper.decode(model, mel, options)
+
+    # print the recognized text
+    print(result.text)
 
 if __name__ == '__main__':
-    # source_separation()
-    slow_transcript()
+    #source_separation()
+    simple_transcript()
