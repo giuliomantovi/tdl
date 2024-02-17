@@ -4,9 +4,9 @@
 
 #relative path to dir containing input audio
 
-INPUT_AUDIO = "Config/input_audio/lazza.m4a"
+INPUT_AUDIO = "Config/input_audio/"
 
 #relative path to dir that stores separated audios
 
-OUTPUT_AUDIO = "Config/output_audio"
+OUTPUT_AUDIO = "Config/output_audio/"
 

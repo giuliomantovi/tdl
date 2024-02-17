@@ -1,9 +1,9 @@
-import microphone_input
+import Recorder
 from Config import Constants
 from spleeter.separator import Separator
 from faster_whisper import WhisperModel
 import whisper
-
+from Recorder import Recorder
 # import os
 # os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 # import warnings
@@ -12,7 +12,7 @@ import whisper
 
 def source_separation():
     separator = Separator('spleeter:5stems')
-    separator.separate_to_file(Constants.INPUT_AUDIO, Constants.OUTPUT_AUDIO)
+    separator.separate_to_file(Constants.INPUT_AUDIO + "mic_input.wav", Constants.OUTPUT_AUDIO)
 
 def fast_transcript():
     model_size = "small"
@@ -33,12 +33,12 @@ def fast_transcript():
 
 def simple_transcript():
     # WHISPER AI WITHOUT CUDA
-    model = whisper.load_model("base", download_root="whisper_models", in_memory=True)
+    model = whisper.load_model("medium", download_root="whisper_models", in_memory=True)
 
-    result = model.transcribe("Config/output_audio/lazza/vocals.wav")
-    with (open("Config/output_audio/transcription.txt", "w") as f):
+    result = model.transcribe(Constants.INPUT_AUDIO + "mic_input.wav")
+    with (open(Constants.OUTPUT_AUDIO + "transcription.txt", "w") as f):
         print(result["text"])
-        #f.write(result["text"])
+        f.write(result["text"])
 
 def low_level_transcript():
     model = whisper.load_model("base", download_root="whisper_models", in_memory=True)
@@ -63,6 +63,8 @@ def low_level_transcript():
     print(result.text)
 
 if __name__ == '__main__':
+    """mic = Recorder()
+    mic.setMicrophone()
+    mic.record()"""
     #source_separation()
     #simple_transcript()
-    microphone_input.record()
