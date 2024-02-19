@@ -3,6 +3,7 @@ from Config import Constants
 from spleeter.separator import Separator
 from faster_whisper import WhisperModel
 import whisper
+from model import *
 from Recorder import Recorder
 # import os
 # os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
@@ -68,3 +69,7 @@ if __name__ == '__main__':
     mic.record()"""
     #source_separation()
     #simple_transcript()
+    data=preprocess(Constants.GTZAN_PATH)
+    createmodel(data)
+    testmodel(data)
+

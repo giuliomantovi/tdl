@@ -10,3 +10,5 @@ INPUT_AUDIO = "Config/input_audio/"
 
 OUTPUT_AUDIO = "Config/output_audio/"
 
+GTZAN_PATH = "GTZAN/Data/genres_original"
+
