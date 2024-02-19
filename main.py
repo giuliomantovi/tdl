@@ -69,7 +69,7 @@ if __name__ == '__main__':
     mic.record()"""
     #source_separation()
     #simple_transcript()
-    data=preprocess(Constants.GTZAN_PATH)
-    createmodel(data)
-    testmodel(data)
+    #data=preprocess(Constants.GTZAN_PATH)
+    #createmodel(data)
+    #testmodel(data)
 

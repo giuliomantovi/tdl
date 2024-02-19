@@ -64,7 +64,7 @@ def testmodel(mfcc_data):
     y = np.array(mfcc_data["labels"])
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25)
     #x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.2)
-    model = tf.keras.models.load_model('GTZAN/GTZAN_LSTM.h5')
+    model = tf.keras.models.load_model('GTZAN/GTZAN_LSTM.h5') #accuracy = 0.9231077292751302
     y_pred = model.predict(x_test)
     y_pred = np.argmax(y_pred, axis=1)
-    np.sum(y_pred == y_test) / len(y_pred)
+    print(np.sum(y_pred == y_test) / len(y_pred))
