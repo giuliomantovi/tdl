@@ -1,3 +1,5 @@
+import numpy as np
+
 import Recorder
 from Config import Constants
 from spleeter.separator import Separator
@@ -5,6 +7,8 @@ from faster_whisper import WhisperModel
 import whisper
 from model import *
 from Recorder import Recorder
+
+
 # import os
 # os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
 # import warnings
@@ -14,6 +18,7 @@ from Recorder import Recorder
 def source_separation():
     separator = Separator('spleeter:5stems')
     separator.separate_to_file(Constants.INPUT_AUDIO + "mic_input.wav", Constants.OUTPUT_AUDIO)
+
 
 def fast_transcript():
     model_size = "small"
@@ -41,6 +46,7 @@ def simple_transcript():
         print(result["text"])
         f.write(result["text"])
 
+
 def low_level_transcript():
     model = whisper.load_model("base", download_root="whisper_models", in_memory=True)
 
@@ -49,7 +55,7 @@ def low_level_transcript():
     audio = whisper.pad_or_trim(audio)
 
     # make log-Mel spectrogram and move to the same device as the model
-    print("model device: "+model.device.__str__())
+    print("model device: " + model.device.__str__())
     mel = whisper.log_mel_spectrogram(audio).to(model.device)
 
     # detect the spoken language
@@ -63,13 +69,16 @@ def low_level_transcript():
     # print the recognized text
     print(result.text)
 
+
 if __name__ == '__main__':
     """mic = Recorder()
     mic.setMicrophone()
     mic.record()"""
-    #source_separation()
-    #simple_transcript()
-    #data=preprocess(Constants.GTZAN_PATH)
-    #createmodel(data)
-    #testmodel(data)
+    # source_separation()
+    # simple_transcript()
+
+    data=preprocess_dataset(Constants.INPUT_AUDIO)
+    # createmodel(data)
+    testmodel(data)
+
 

@@ -9,22 +9,24 @@ from sklearn.model_selection import train_test_split
 from Config import Constants
 
 
-def preprocess(dataset_path, num_mfcc=40, n_fft=2048, hop_length=512, num_segment=10):
-    data = {"labels": [], "mfcc": []}
+def preprocess_dataset(dataset_path, num_mfcc=40, n_fft=2048, hop_length=512, num_segment=10):
+    data = {"labels": [], "mfcc": [], "seconds": []}
     sample_rate = 22050
     samples_per_segment = int(sample_rate * 30 / num_segment)
     for label_idx, (dirpath, dirnames, filenames) in enumerate(os.walk(dataset_path)):
         if dirpath == dataset_path:
             continue
+        print(label_idx)
         for f in sorted(filenames):
             if not f.endswith('.wav'):
                 continue
             file_path = str(str(dirpath).split('\\')[-1]) + "/" + str(f)
-            print("Track Name ", file_path)
+            # print("Track Name ", file_path)
             try:
-                y, sr = librosa.load(Constants.GTZAN_PATH + "/" + file_path, sr=sample_rate)
+                y, sr = librosa.load(dataset_path + "/" + file_path, sr=sample_rate)
             except:
                 continue
+            data["seconds"].append(librosa.get_duration(y=y, sr=sr))
             for n in range(num_segment):
                 mfcc = librosa.feature.mfcc(y=y[samples_per_segment * n: samples_per_segment * (n + 1)], sr=sample_rate,
                                             n_mfcc=num_mfcc, n_fft=n_fft, hop_length=hop_length)
@@ -32,6 +34,15 @@ def preprocess(dataset_path, num_mfcc=40, n_fft=2048, hop_length=512, num_segmen
                 if len(mfcc) == math.ceil(samples_per_segment / hop_length):
                     data["mfcc"].append(mfcc.tolist())
                     data["labels"].append(label_idx - 1)
+    return data
+
+
+def preprocess_audio(audio_path, num_mfcc=40, n_fft=2048, hop_length=512, num_segment=10):
+    data = {"labels": [audio_path], "mfcc": []}
+    x, sr = librosa.load(audio_path)
+    mfcc = librosa.feature.mfcc(y=x, sr=sr, n_mfcc=num_mfcc)
+    mfcc = mfcc.T  # transpose
+    data["mfcc"].append(mfcc.tolist())
     return data
 
 
@@ -62,9 +73,26 @@ def createmodel(mfcc_data):
 def testmodel(mfcc_data):
     x = np.array(mfcc_data["mfcc"])
     y = np.array(mfcc_data["labels"])
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25)
-    #x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.2)
-    model = tf.keras.models.load_model('GTZAN/GTZAN_LSTM.h5') #accuracy = 0.9231077292751302
-    y_pred = model.predict(x_test)
+    print(y)
+    print("lunghezza y")
+    print(len(y))
+    # x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25)
+    # x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.2)
+    model = tf.keras.models.load_model('GTZAN/GTZAN_LSTM.h5')  # accuracy = 0.9231077292751302
+    y_pred = model.predict(x)
     y_pred = np.argmax(y_pred, axis=1)
-    print(np.sum(y_pred == y_test) / len(y_pred))
+    print("PREDICTIONS: ")
+    print(y_pred)
+    print("Secondi: ")
+    print(mfcc_data["seconds"])
+    numbers_per_audio = []
+    for second in mfcc_data["seconds"]:
+        numbers_per_audio.append(math.floor(10 * second / 30))
+    for i in range(len(numbers_per_audio)):
+        if i != 0:
+            numbers_per_audio[i] += numbers_per_audio[i - 1]
+    print(numbers_per_audio)
+    # print(np.sum(y_pred == y_test) / len(y_pred))
+    y_pred = np.split(y_pred, numbers_per_audio[:-1])
+    print(y_pred)
+    return y_pred
