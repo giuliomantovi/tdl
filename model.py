@@ -73,30 +73,23 @@ def createmodel(mfcc_data):
 
 def testmodel(mfcc_data):
     x = np.array(mfcc_data["mfcc"])
-    y = np.array(mfcc_data["labels"])
-    print(y)
-    print("lunghezza y")
-    print(len(y))
+    # y = np.array(mfcc_data["labels"])
     # x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25)
     # x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.2)
     model = tf.keras.models.load_model('GTZAN/GTZAN_LSTM.h5')  # accuracy = 0.9231077292751302
     y_pred = model.predict(x)
     y_pred = np.argmax(y_pred, axis=1)
-    print("PREDICTIONS: ")
-    print(y_pred)
-    print("Secondi: ")
     print(mfcc_data["duration"])
     numbers_per_audio = []
     for second in mfcc_data["duration"]:
-        numbers_per_audio.append(math.floor(10 * second / 30))
+        numbers_per_audio.append(min(math.floor(10 * second / 30), 10))
     for i in range(len(numbers_per_audio)):
         if i != 0:
             numbers_per_audio[i] += numbers_per_audio[i - 1]
-    print(numbers_per_audio)
     # print(np.sum(y_pred == y_test) / len(y_pred))
     print(mfcc_data["filenames"])
     y_pred = np.split(y_pred, numbers_per_audio[:-1])
-    print(y_pred)
+    #print(y_pred)
     audio_genres = []
     for arr in y_pred:
         audio_genres.append(most_frequent(arr))
