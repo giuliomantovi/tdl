@@ -10,7 +10,7 @@ from Config import Constants
 
 
 def preprocess_dataset(dataset_path, num_mfcc=40, n_fft=2048, hop_length=512, num_segment=10):
-    data = {"labels": [], "mfcc": [], "seconds": []}
+    data = {"labels": [], "mfcc": [], "duration": [], "filenames": []}
     sample_rate = 22050
     samples_per_segment = int(sample_rate * 30 / num_segment)
     for label_idx, (dirpath, dirnames, filenames) in enumerate(os.walk(dataset_path)):
@@ -26,7 +26,8 @@ def preprocess_dataset(dataset_path, num_mfcc=40, n_fft=2048, hop_length=512, nu
                 y, sr = librosa.load(dataset_path + "/" + file_path, sr=sample_rate)
             except:
                 continue
-            data["seconds"].append(librosa.get_duration(y=y, sr=sr))
+            data["duration"].append(librosa.get_duration(y=y, sr=sr))
+            data["filenames"].append(f)
             for n in range(num_segment):
                 mfcc = librosa.feature.mfcc(y=y[samples_per_segment * n: samples_per_segment * (n + 1)], sr=sample_rate,
                                             n_mfcc=num_mfcc, n_fft=n_fft, hop_length=hop_length)
@@ -84,15 +85,28 @@ def testmodel(mfcc_data):
     print("PREDICTIONS: ")
     print(y_pred)
     print("Secondi: ")
-    print(mfcc_data["seconds"])
+    print(mfcc_data["duration"])
     numbers_per_audio = []
-    for second in mfcc_data["seconds"]:
+    for second in mfcc_data["duration"]:
         numbers_per_audio.append(math.floor(10 * second / 30))
     for i in range(len(numbers_per_audio)):
         if i != 0:
             numbers_per_audio[i] += numbers_per_audio[i - 1]
     print(numbers_per_audio)
     # print(np.sum(y_pred == y_test) / len(y_pred))
+    print(mfcc_data["filenames"])
     y_pred = np.split(y_pred, numbers_per_audio[:-1])
     print(y_pred)
-    return y_pred
+    audio_genres = []
+    for arr in y_pred:
+        audio_genres.append(most_frequent(arr))
+    print(audio_genres)
+    return audio_genres
+
+
+def most_frequent(arr):
+    unique, counts = np.unique(arr, return_counts=True)
+    index = np.argmax(counts)
+    return unique[index]
+
+
