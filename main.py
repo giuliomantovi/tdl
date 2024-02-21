@@ -5,6 +5,7 @@ from Config import Constants
 from spleeter.separator import Separator
 from faster_whisper import WhisperModel
 import whisper
+import matplotlib.pyplot as plt
 from model import *
 from Recorder import Recorder
 
@@ -70,6 +71,19 @@ def low_level_transcript():
     print(result.text)
 
 
+def create_spectrogram(audio):
+    scale, sr = librosa.load(audio)
+    filter_banks = librosa.filters.mel(n_fft=2048, sr=22050, n_mels=10)
+    print(filter_banks.shape)
+    plt.figure(figsize=(4.5, 3)) #288x432 pixels
+    librosa.display.specshow(filter_banks,
+                             sr=sr,
+                             x_axis='linear')
+    plt.colorbar(format="%+2.f")
+    plt.show()
+    # plt.savefig()
+
+
 if __name__ == '__main__':
     """mic = Recorder()
     mic.setMicrophone()
@@ -77,8 +91,8 @@ if __name__ == '__main__':
     # source_separation()
     # simple_transcript()
 
-    #data=preprocess_dataset(Constants.GTZAN_IMAGE_PATH)
-    createCNNimagemodel(Constants.GTZAN_IMAGE_PATH)
-    #testmodel(data, Constants.CNN_PATH)
+    # data=preprocess_dataset(Constants.GTZAN_IMAGE_PATH)
+    # createCNNimagemodel(Constants.GTZAN_IMAGE_PATH)
+    # testmodel(data, Constants.CNN_PATH)
 
-
+    create_spectrogram(Constants.INPUT_AUDIO + "/blues/ringoffire.wav")
