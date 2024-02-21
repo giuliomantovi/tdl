@@ -78,7 +78,7 @@ if __name__ == '__main__':
     # simple_transcript()
 
     data=preprocess_dataset(Constants.INPUT_AUDIO)
-    # createmodel(data)
-    testmodel(data)
+    #createCNNmodel(data)
+    testmodel(data, Constants.CNN_PATH)
 
 

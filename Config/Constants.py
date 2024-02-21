@@ -12,3 +12,8 @@ OUTPUT_AUDIO = "Config/output_audio/"
 
 GTZAN_PATH = "GTZAN/Data/genres_original"
 
+LSMT_PATH = "GTZAN/GTZAN_LSMT.h5"
+
+CNN_PATH = "GTZAN/GTZAN_CNN.h5"
+
+
