@@ -147,15 +147,16 @@ def createCNNimagemodel(image_folder):
     image_model.add(layers.Dense(10, activation="softmax"))
     image_model.summary()
 
-    opt = Adam(lr=0.0001)
+    opt = Adam(learning_rate=0.0001)
     image_model.compile(optimizer=opt,
                         loss='sparse_categorical_crossentropy',
                         metrics=['accuracy'])
     history = image_model.fit(x_train, y_train,
-                              epochs=100,
+                              epochs=25, #100
                               validation_data=(x_val, y_val),
-                              batch_size=32,
+                              batch_size=16, #32
                               verbose=2)
+    image_model.save("GTZAN/GTZAN_IMAGE_CNN.h5")
     #test
     y_pred = image_model.predict(x_test)
     y_pred = np.argmax(y_pred, axis=1)
