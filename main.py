@@ -77,8 +77,8 @@ if __name__ == '__main__':
     # source_separation()
     # simple_transcript()
 
-    data=preprocess_dataset(Constants.INPUT_AUDIO)
-    #createCNNmodel(data)
-    testmodel(data, Constants.CNN_PATH)
+    #data=preprocess_dataset(Constants.GTZAN_IMAGE_PATH)
+    createCNNimagemodel(Constants.GTZAN_IMAGE_PATH)
+    #testmodel(data, Constants.CNN_PATH)
 
 

@@ -10,10 +10,12 @@ INPUT_AUDIO = "Config/input_audio"
 
 OUTPUT_AUDIO = "Config/output_audio/"
 
-GTZAN_PATH = "GTZAN/Data/genres_original"
+GTZAN_AUDIO_PATH = "GTZAN/Data/genres_original"
+
+GTZAN_IMAGE_PATH = "GTZAN/Data/images_original"
 
 LSMT_PATH = "GTZAN/GTZAN_LSMT.h5"
 
 CNN_PATH = "GTZAN/GTZAN_CNN.h5"
 
-
+CNN_IMAGE_PATH = "GTZAN/GTZAN_IMAGE_CNN.h5"
