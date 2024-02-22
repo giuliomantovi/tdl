@@ -1,4 +1,6 @@
+import librosa
 import numpy as np
+import pandas as pd
 
 import Recorder
 from Config import Constants
@@ -72,16 +74,22 @@ def low_level_transcript():
 
 
 def create_spectrogram(audio):
-    scale, sr = librosa.load(audio)
-    filter_banks = librosa.filters.mel(n_fft=2048, sr=22050, n_mels=10)
-    print(filter_banks.shape)
-    plt.figure(figsize=(4.5, 3)) #288x432 pixels
-    librosa.display.specshow(filter_banks,
-                             sr=sr,
-                             x_axis='linear')
-    plt.colorbar(format="%+2.f")
+    y, sr = librosa.load(audio)
+    D = librosa.stft(y)
+    S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
+    print(S_db.shape)
+    fig, ax = plt.subplots(figsize=(4.5, 3))
+    img = librosa.display.specshow(S_db,ax=ax)
     plt.show()
-    # plt.savefig()
+
+def create_mel_spectrogram(audio):
+    y, sr = librosa.load(audio)
+    S = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128*2)
+    S_db_mel = librosa.amplitude_to_db(S, ref=np.max)
+    print(S_db_mel.shape)
+    fig, ax = plt.subplots(figsize=(4.5, 3))
+    img = librosa.display.specshow(S_db_mel, ax=ax)
+    plt.show()
 
 
 if __name__ == '__main__':
@@ -95,4 +103,4 @@ if __name__ == '__main__':
     # createCNNimagemodel(Constants.GTZAN_IMAGE_PATH)
     # testmodel(data, Constants.CNN_PATH)
 
-    create_spectrogram(Constants.INPUT_AUDIO + "/blues/ringoffire.wav")
+    create_mel_spectrogram(Constants.INPUT_AUDIO + "/pop/sinceramente.wav")
