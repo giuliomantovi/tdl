@@ -121,3 +121,4 @@ if __name__ == '__main__':
     # testimagemodel(Constants.INPUT_IMAGES, Constants.CNN_IMAGE_PATH)
 
     # audio_to_spectrograms(Constants.INPUT_AUDIO)
+    efficientnet_predict(Constants.INPUT_IMAGES)

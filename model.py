@@ -171,6 +171,29 @@ def createCNNimagemodel(image_folder):
     print(np.sum(y_pred == y_test) / len(y_pred))
 
 
+def efficientnet_predict(image_folder):
+    x_img, y_img = load_image_data(image_folder)
+    label_encoder = LabelEncoder()
+    y_img = label_encoder.fit_transform(y_img)
+
+    x_train, x_test, y_train, y_test = train_test_split(x_img, y_img, test_size=0.22, random_state=42)
+    x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.2, random_state=42)
+
+    # Each image in the dataset is of the shape (288, 432, 3).
+    input_shape = x_img.shape[1:]
+
+    model = tf.keras.applications.efficientnet.EfficientNetB7(
+        include_top=False,
+        weights='imagenet',
+        input_shape=input_shape,
+        classifier_activation='softmax',
+    )
+
+    model.save("GTZAN/GTZAN_EFFICIENTNETB7.h5")
+    y_pred = model.predict(x_img)
+
+    y_pred = np.argmax(y_pred, axis=1)
+    print(y_pred)
 def default_testmodel(mfcc_data, model_type):
     x = np.array(mfcc_data["mfcc"])
     y = np.array(mfcc_data["labels"])
