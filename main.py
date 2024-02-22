@@ -79,17 +79,26 @@ def create_spectrogram(audio):
     S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
     print(S_db.shape)
     fig, ax = plt.subplots(figsize=(4.5, 3))
-    img = librosa.display.specshow(S_db,ax=ax)
+    img = librosa.display.specshow(S_db, ax=ax)
     plt.show()
 
-def create_mel_spectrogram(audio):
-    y, sr = librosa.load(audio)
-    S = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128*2)
-    S_db_mel = librosa.amplitude_to_db(S, ref=np.max)
-    print(S_db_mel.shape)
-    fig, ax = plt.subplots(figsize=(4.5, 3))
-    img = librosa.display.specshow(S_db_mel, ax=ax)
-    plt.show()
+
+def create_mel_spectrogram(audio_path, filename):
+    y, sr = librosa.load(audio_path)
+    s = librosa.feature.melspectrogram(y=y, sr=sr)
+    s_db_mel = librosa.amplitude_to_db(s, ref=np.max)
+    print(s_db_mel.shape)
+    fig, ax = plt.subplots(figsize=(4.32, 2.88))
+    img = librosa.display.specshow(s_db_mel, ax=ax)
+    plt.savefig(fname=Constants.INPUT_IMAGES + "/" + filename + ".png", format='png')
+    # plt.show()
+
+
+def audio_to_spectrograms(dir_path):
+    for root, subdirs, files in os.walk(dir_path):
+        for filename in files:
+            file_path = os.path.join(root, filename)
+            create_mel_spectrogram(file_path, filename[:-4])
 
 
 if __name__ == '__main__':
@@ -103,4 +112,4 @@ if __name__ == '__main__':
     # createCNNimagemodel(Constants.GTZAN_IMAGE_PATH)
     # testmodel(data, Constants.CNN_PATH)
 
-    create_mel_spectrogram(Constants.INPUT_AUDIO + "/pop/sinceramente.wav")
+    #audio_to_spectrograms(Constants.INPUT_AUDIO)

@@ -1,6 +1,6 @@
 pretrained_ss_models/
 .idea/
 Config/output_audio
-Config/input_audio
+Config/input
 whisper_models
 GTZAN

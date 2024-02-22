@@ -4,7 +4,9 @@
 
 #relative path to dir containing input audio
 
-INPUT_AUDIO = "Config/input_audio"
+INPUT_AUDIO = "Config/input/audio"
+
+INPUT_IMAGES = "Config/input/images"
 
 #relative path to dir that stores separated audios
 
