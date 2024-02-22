@@ -107,7 +107,7 @@ def createCNNmodel(mfcc_data):
     y_test = np.argmax(y_test, axis=1)
     print(np.sum(y_pred == y_test) / len(y_pred))
 
-
+# for creating the model with GTZAN dataset
 def load_image_data(img_folder):
     x = []
     y = []
@@ -119,6 +119,13 @@ def load_image_data(img_folder):
 
     return np.array(x), np.array(y)
 
+#for predicting input from user
+def load_image_test(img_folder):
+    x = []
+    for root, subdirs, files in os.walk(img_folder):
+        for filename in files:
+            x = x + [cv2.imread(os.path.join(root, filename))]
+    return np.array(x)
 
 def createCNNimagemodel(image_folder):
     x_img, y_img = load_image_data(image_folder)
@@ -175,7 +182,7 @@ def default_testmodel(mfcc_data, model_type):
     print(np.sum(y_pred == y_test) / len(y_pred))
 
 
-def testmodel(mfcc_data, model_path):
+def testaudiomodel(mfcc_data, model_path):
     x = np.array(mfcc_data["mfcc"])
     model = tf.keras.models.load_model(model_path)
     y_pred = model.predict(x)
@@ -197,6 +204,14 @@ def testmodel(mfcc_data, model_path):
     print(audio_genres)
     return audio_genres
 
+
+def testimagemodel(images_path, model_path):
+    x_img = load_image_test(images_path)
+    model = tf.keras.models.load_model(model_path)
+    y_pred = model.predict(x_img)
+    print(y_pred)
+    y_pred = np.argmax(y_pred, axis=1)
+    print(y_pred)
 
 def most_frequent(arr):
     unique, counts = np.unique(arr, return_counts=True)

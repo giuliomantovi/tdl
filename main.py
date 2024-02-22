@@ -101,6 +101,14 @@ def audio_to_spectrograms(dir_path):
             create_mel_spectrogram(file_path, filename[:-4])
 
 
+"""def extract_genre_subdirectories(file_path, num_subdirectories=5):
+    subdirectories = []
+    for _ in range(num_subdirectories):
+        file_path, subdirectory = os.path.split(file_path)
+        subdirectories.insert(0, subdirectory)
+    return subdirectories[3]"""
+
+
 if __name__ == '__main__':
     """mic = Recorder()
     mic.setMicrophone()
@@ -110,6 +118,6 @@ if __name__ == '__main__':
 
     # data=preprocess_dataset(Constants.GTZAN_IMAGE_PATH)
     # createCNNimagemodel(Constants.GTZAN_IMAGE_PATH)
-    # testmodel(data, Constants.CNN_PATH)
+    # testimagemodel(Constants.INPUT_IMAGES, Constants.CNN_IMAGE_PATH)
 
-    #audio_to_spectrograms(Constants.INPUT_AUDIO)
+    # audio_to_spectrograms(Constants.INPUT_AUDIO)
