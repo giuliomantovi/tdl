@@ -16,7 +16,7 @@ GTZAN_AUDIO_PATH = "GTZAN/Data/genres_original"
 
 GTZAN_IMAGE_PATH = "GTZAN/Data/images_original"
 
-LSMT_PATH = "GTZAN/GTZAN_LSMT.h5"
+LSMT_PATH = "GTZAN/GTZAN_LSTM.h5"
 
 CNN_PATH = "GTZAN/GTZAN_CNN.h5"
 

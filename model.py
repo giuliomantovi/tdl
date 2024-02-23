@@ -69,7 +69,7 @@ def createLSMTmodel(mfcc_data):
     y_pred = np.argmax(y_pred, axis=1)
     print(np.sum(y_pred == y_test) / len(y_pred))
 
-
+# rete neurale convoluzionale, input = mfcc degli audio, accuracy:90%
 def createCNNmodel(mfcc_data):
     x = np.array(mfcc_data["mfcc"])
     y = np.array(mfcc_data["labels"])
@@ -99,7 +99,7 @@ def createCNNmodel(mfcc_data):
     cnn_model.compile(loss='binary_crossentropy', optimizer='adam', metrics='acc')
     cnn_model.summary()
 
-    history = cnn_model.fit(x_train, y_train, validation_data=(x_val, y_val), batch_size=32, epochs=40, verbose=2)
+    history = cnn_model.fit(x_train, y_train, validation_data=(x_val, y_val), batch_size=32, epochs=50, verbose=2)
     cnn_model.save("GTZAN/GTZAN_CNN.h5")
     # testing accuracy
     y_pred = cnn_model.predict(x_test)
@@ -127,6 +127,7 @@ def load_image_test(img_folder):
             x = x + [cv2.imread(os.path.join(root, filename))]
     return np.array(x)
 
+# rete neurale convoluzionale, input = spettrogrammi in png degli audio, accuracy:62%
 def createCNNimagemodel(image_folder):
     x_img, y_img = load_image_data(image_folder)
     label_encoder = LabelEncoder()
@@ -159,7 +160,7 @@ def createCNNimagemodel(image_folder):
                         loss='sparse_categorical_crossentropy',
                         metrics=['accuracy'])
     history = image_model.fit(x_train, y_train,
-                              epochs=25, #100
+                              epochs=50, #100
                               validation_data=(x_val, y_val),
                               batch_size=16, #32
                               verbose=2)
@@ -171,7 +172,7 @@ def createCNNimagemodel(image_folder):
     print(np.sum(y_pred == y_test) / len(y_pred))
 
 
-def efficientnet_predict(image_folder):
+"""def efficientnet_predict(image_folder):
     x_img, y_img = load_image_data(image_folder)
     label_encoder = LabelEncoder()
     y_img = label_encoder.fit_transform(y_img)
@@ -193,7 +194,9 @@ def efficientnet_predict(image_folder):
     y_pred = model.predict(x_img)
 
     y_pred = np.argmax(y_pred, axis=1)
-    print(y_pred)
+    print(y_pred)"""
+
+
 def default_testmodel(mfcc_data, model_type):
     x = np.array(mfcc_data["mfcc"])
     y = np.array(mfcc_data["labels"])
