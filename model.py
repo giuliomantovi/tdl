@@ -69,6 +69,7 @@ def createLSMTmodel(mfcc_data):
     y_pred = np.argmax(y_pred, axis=1)
     print(np.sum(y_pred == y_test) / len(y_pred))
 
+
 # rete neurale convoluzionale, input = mfcc degli audio, accuracy:90%
 def createCNNmodel(mfcc_data):
     x = np.array(mfcc_data["mfcc"])
@@ -107,6 +108,7 @@ def createCNNmodel(mfcc_data):
     y_test = np.argmax(y_test, axis=1)
     print(np.sum(y_pred == y_test) / len(y_pred))
 
+
 # for creating the model with GTZAN dataset
 def load_image_data(img_folder):
     x = []
@@ -119,13 +121,15 @@ def load_image_data(img_folder):
 
     return np.array(x), np.array(y)
 
-#for predicting input from user
+
+# for predicting input from user
 def load_image_test(img_folder):
     x = []
     for root, subdirs, files in os.walk(img_folder):
         for filename in files:
             x = x + [cv2.imread(os.path.join(root, filename))]
     return np.array(x)
+
 
 # rete neurale convoluzionale, input = spettrogrammi in png degli audio, accuracy:62%
 def createCNNimagemodel(image_folder):
@@ -160,16 +164,94 @@ def createCNNimagemodel(image_folder):
                         loss='sparse_categorical_crossentropy',
                         metrics=['accuracy'])
     history = image_model.fit(x_train, y_train,
-                              epochs=50, #100
+                              epochs=50,  # 100
                               validation_data=(x_val, y_val),
-                              batch_size=16, #32
+                              batch_size=16,  # 32
                               verbose=2)
     image_model.save("GTZAN/GTZAN_IMAGE_CNN.h5")
-    #test
+    # test
     y_pred = image_model.predict(x_test)
     y_pred = np.argmax(y_pred, axis=1)
 
     print(np.sum(y_pred == y_test) / len(y_pred))
+
+
+# Function: Definition of CRNN6 layers
+def model_build_crnn6(image_folder):
+    x_img, y_img = load_image_data(image_folder)
+    label_encoder = LabelEncoder()
+    y_img = label_encoder.fit_transform(y_img)
+
+    x_train, x_test, y_train, y_test = train_test_split(x_img, y_img, test_size=0.22, random_state=42)
+    x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.2, random_state=42)
+
+    # Each image in the dataset is of the shape (288, 432, 3).
+    input_shape = x_train.shape[1:]
+    #input_shape = (288, 432)
+
+    model = models.Sequential(name='crnn6')
+
+    model.add(layers.Reshape(target_shape=input_shape, input_shape=input_shape))
+    model.add(layers.ZeroPadding2D(padding=(0, 37)))
+
+    model.add(layers.BatchNormalization(axis=3))
+
+    model.add(layers.Conv2D(filters=32, kernel_size=(3, 3), padding='same'))
+    model.add(layers.BatchNormalization(axis=3))
+    model.add(layers.ELU())
+    model.add(layers.MaxPooling2D(pool_size=(2, 2)))
+    model.add(layers.Dropout(rate=0.25))
+
+    model.add(layers.Conv2D(filters=64, kernel_size=(3, 3), padding='same'))
+    model.add(layers.BatchNormalization(axis=3))
+    model.add(layers.ELU())
+    model.add(layers.MaxPooling2D(pool_size=(2, 2)))
+    model.add(layers.Dropout(rate=0.25))
+
+    model.add(layers.Conv2D(filters=128, kernel_size=(3, 3), padding='same'))
+    model.add(layers.BatchNormalization(axis=3))
+    model.add(layers.ELU())
+    model.add(layers.MaxPooling2D(pool_size=(2, 3)))
+    model.add(layers.Dropout(rate=0.25))
+
+    model.add(layers.Conv2D(filters=256, kernel_size=(3, 3), padding='same'))
+    model.add(layers.BatchNormalization(axis=3))
+    model.add(layers.ELU())
+    model.add(layers.MaxPooling2D(pool_size=(2, 4)))
+    model.add(layers.Dropout(rate=0.25))
+
+    model.add(layers.Conv2D(filters=512, kernel_size=(3, 3), padding='same'))
+    model.add(layers.BatchNormalization(axis=3))
+    model.add(layers.ELU())
+    model.add(layers.MaxPooling2D(pool_size=(2, 5)))
+    model.add(layers.Dropout(rate=0.25))
+
+    model.add(layers.Conv2D(filters=1024, kernel_size=(3, 3), padding='same'))
+    model.add(layers.BatchNormalization(axis=3))
+    model.add(layers.ELU())
+    model.add(layers.MaxPooling2D(pool_size=(3, 6)))
+    model.add(layers.Dropout(rate=0.25))
+
+    model.add(layers.Reshape(target_shape=(1, 1024)))
+    model.add(layers.GRU(units=256, return_sequences=True))
+    model.add(layers.GRU(units=256, return_sequences=False))
+    model.add(layers.Dropout(rate=0.5))
+    model.add(layers.Dense(units=10, activation='sigmoid'))
+
+    opt = Adam(learning_rate=0.0001)
+    model.compile(optimizer=opt,
+                  loss='sparse_categorical_crossentropy',
+                  metrics=['accuracy'])
+    history = model.fit(x_train, y_train,
+                        epochs=50,  # 100
+                        validation_data=(x_val, y_val),
+                        batch_size=16,  # 32
+                        verbose=2)
+    model.save("GTZAN/GTZAN_IMAGE_CRNN6.h5")
+    # test
+    y_pred = (model.predict(x_test))
+    y_pred = np.argmax(y_pred, axis=1)
+    return y_pred
 
 
 """def efficientnet_predict(image_folder):
@@ -238,6 +320,7 @@ def testimagemodel(images_path, model_path):
     print(y_pred)
     y_pred = np.argmax(y_pred, axis=1)
     print(y_pred)
+
 
 def most_frequent(arr):
     unique, counts = np.unique(arr, return_counts=True)

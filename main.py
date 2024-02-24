@@ -116,8 +116,9 @@ if __name__ == '__main__':
     # source_separation()
     # simple_transcript()
 
-    data=preprocess_dataset(Constants.INPUT_AUDIO)
+    #data=preprocess_dataset(Constants.INPUT_AUDIO)
     #createCNNmodel(data)
-    testaudiomodel(data, Constants.CNN_PATH)
+    #testimagemodel(Constants.INPUT_IMAGES, Constants.CNN_IMAGE_PATH)
 
+    model_build_crnn6(Constants.GTZAN_IMAGE_PATH)
     # audio_to_spectrograms(Constants.INPUT_AUDIO)
