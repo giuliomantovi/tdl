@@ -5,6 +5,7 @@ import os
 import numpy as np
 import tensorflow as tf
 import cv2
+import matplotlib.pyplot as plt
 from keras import layers, models
 from keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
@@ -113,12 +114,20 @@ def createCNNmodel(mfcc_data):
 def load_image_data(img_folder):
     x = []
     y = []
-
     for genre_folder in os.listdir(img_folder):
         x = x + [cv2.imread(os.path.join(img_folder, genre_folder, curr_file))
                  for curr_file in os.listdir(os.path.join(img_folder, genre_folder))]
         y = y + [genre_folder] * len(os.listdir(os.path.join(img_folder, genre_folder)))
+    return np.array(x), np.array(y)
 
+
+def load_resize_image_data(img_folder):
+    x = []
+    y = []
+    for genre_folder in os.listdir(img_folder):
+        x = x + [cv2.resize(cv2.imread(os.path.join(img_folder, genre_folder, curr_file)), (200, 200))
+                 for curr_file in os.listdir(os.path.join(img_folder, genre_folder))]
+        y = y + [genre_folder] * len(os.listdir(os.path.join(img_folder, genre_folder)))
     return np.array(x), np.array(y)
 
 
@@ -176,86 +185,20 @@ def createCNNimagemodel(image_folder):
     print(np.sum(y_pred == y_test) / len(y_pred))
 
 
-# Function: Definition of CRNN6 layers
-def model_build_crnn6(image_folder):
-    x_img, y_img = load_image_data(image_folder)
-    label_encoder = LabelEncoder()
-    y_img = label_encoder.fit_transform(y_img)
+def unfreeze_model(model):
+    # We unfreeze the top 20 layers while leaving BatchNorm layers frozen
+    for layer in model.layers[-20:]:
+        if not isinstance(layer, layers.BatchNormalization):
+            layer.trainable = True
 
-    x_train, x_test, y_train, y_test = train_test_split(x_img, y_img, test_size=0.22, random_state=42)
-    x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.2, random_state=42)
-
-    # Each image in the dataset is of the shape (288, 432, 3).
-    input_shape = x_train.shape[1:]
-    #input_shape = (288, 432)
-
-    model = models.Sequential(name='crnn6')
-
-    model.add(layers.Reshape(target_shape=input_shape, input_shape=input_shape))
-    model.add(layers.ZeroPadding2D(padding=(0, 37)))
-
-    model.add(layers.BatchNormalization(axis=3))
-
-    model.add(layers.Conv2D(filters=32, kernel_size=(3, 3), padding='same'))
-    model.add(layers.BatchNormalization(axis=3))
-    model.add(layers.ELU())
-    model.add(layers.MaxPooling2D(pool_size=(2, 2)))
-    model.add(layers.Dropout(rate=0.25))
-
-    model.add(layers.Conv2D(filters=64, kernel_size=(3, 3), padding='same'))
-    model.add(layers.BatchNormalization(axis=3))
-    model.add(layers.ELU())
-    model.add(layers.MaxPooling2D(pool_size=(2, 2)))
-    model.add(layers.Dropout(rate=0.25))
-
-    model.add(layers.Conv2D(filters=128, kernel_size=(3, 3), padding='same'))
-    model.add(layers.BatchNormalization(axis=3))
-    model.add(layers.ELU())
-    model.add(layers.MaxPooling2D(pool_size=(2, 3)))
-    model.add(layers.Dropout(rate=0.25))
-
-    model.add(layers.Conv2D(filters=256, kernel_size=(3, 3), padding='same'))
-    model.add(layers.BatchNormalization(axis=3))
-    model.add(layers.ELU())
-    model.add(layers.MaxPooling2D(pool_size=(2, 4)))
-    model.add(layers.Dropout(rate=0.25))
-
-    model.add(layers.Conv2D(filters=512, kernel_size=(3, 3), padding='same'))
-    model.add(layers.BatchNormalization(axis=3))
-    model.add(layers.ELU())
-    model.add(layers.MaxPooling2D(pool_size=(2, 5)))
-    model.add(layers.Dropout(rate=0.25))
-
-    model.add(layers.Conv2D(filters=1024, kernel_size=(3, 3), padding='same'))
-    model.add(layers.BatchNormalization(axis=3))
-    model.add(layers.ELU())
-    model.add(layers.MaxPooling2D(pool_size=(3, 6)))
-    model.add(layers.Dropout(rate=0.25))
-
-    model.add(layers.Reshape(target_shape=(1, 1024)))
-    model.add(layers.GRU(units=256, return_sequences=True))
-    model.add(layers.GRU(units=256, return_sequences=False))
-    model.add(layers.Dropout(rate=0.5))
-    model.add(layers.Dense(units=10, activation='sigmoid'))
-
-    opt = Adam(learning_rate=0.0001)
-    model.compile(optimizer=opt,
-                  loss='sparse_categorical_crossentropy',
-                  metrics=['accuracy'])
-    history = model.fit(x_train, y_train,
-                        epochs=50,  # 100
-                        validation_data=(x_val, y_val),
-                        batch_size=16,  # 32
-                        verbose=2)
-    model.save("GTZAN/GTZAN_IMAGE_CRNN6.h5")
-    # test
-    y_pred = (model.predict(x_test))
-    y_pred = np.argmax(y_pred, axis=1)
-    return y_pred
+    optimizer = tf.keras.optimizers.Adam(learning_rate=1e-5)
+    model.compile(
+        optimizer=optimizer, loss="categorical_crossentropy", metrics=["accuracy"]
+    )
 
 
-"""def efficientnet_predict(image_folder):
-    x_img, y_img = load_image_data(image_folder)
+def create_efficientnet_model(image_folder):
+    x_img, y_img = load_resize_image_data(image_folder)
     label_encoder = LabelEncoder()
     y_img = label_encoder.fit_transform(y_img)
 
@@ -264,19 +207,58 @@ def model_build_crnn6(image_folder):
 
     # Each image in the dataset is of the shape (288, 432, 3).
     input_shape = x_img.shape[1:]
-
-    model = tf.keras.applications.efficientnet.EfficientNetB7(
+    inputs = layers.Input(shape=input_shape)
+    print(input_shape)
+    model = tf.keras.applications.efficientnet.EfficientNetB0(
         include_top=False,
         weights='imagenet',
-        input_shape=input_shape,
-        classifier_activation='softmax',
+        input_tensor=inputs,
+        # classifier_activation='softmax',
     )
 
-    model.save("GTZAN/GTZAN_EFFICIENTNETB7.h5")
-    y_pred = model.predict(x_img)
+    model.trainable = False
+    x = layers.GlobalAveragePooling2D(name="avg_pool")(model.output)
+    x = layers.BatchNormalization()(x)
 
-    y_pred = np.argmax(y_pred, axis=1)
-    print(y_pred)"""
+    top_dropout_rate = 0.2
+    x = layers.Dropout(top_dropout_rate, name="top_dropout")(x)
+    outputs = layers.Dense(10, activation="softmax", name="pred")(x)
+
+    # Compile
+    model = tf.keras.Model(inputs, outputs, name="EfficientNet")
+    optimizer = tf.keras.optimizers.Adam(learning_rate=1e-2)
+    model.compile(
+        optimizer=optimizer, loss="categorical_crossentropy", metrics=["accuracy"]
+    )
+
+    epochs = 50  # @param {type: "slider", min:8, max:80}
+    hist = model.fit(x_train, y_train,
+                     epochs=epochs,  # 100
+                     validation_data=(x_val, y_val))
+    # plot_hist(hist)
+
+    # 2 step
+    """unfreeze_model(model)
+    epochs = 4  # @param {type: "slider", min:8, max:80}
+    hist = model.fit(x_train, y_train,
+                     epochs=epochs,  # 100
+                     validation_data=(x_val, y_val))"""
+    plot_hist(hist)
+
+    model.save("GTZAN/GTZAN_EFFICIENTNETB0.h5")
+    # y_pred = model.predict(x_img)
+    # y_pred = np.argmax(y_pred, axis=1)
+    # print(y_pred)
+
+
+def plot_hist(hist):
+    plt.plot(hist.history["accuracy"])
+    plt.plot(hist.history["val_accuracy"])
+    plt.title("model accuracy")
+    plt.ylabel("accuracy")
+    plt.xlabel("epoch")
+    plt.legend(["train", "validation"], loc="upper left")
+    plt.show()
 
 
 def default_testmodel(mfcc_data, model_type):

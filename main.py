@@ -88,7 +88,8 @@ def create_mel_spectrogram(audio_path, filename):
     s = librosa.feature.melspectrogram(y=y, sr=sr)
     s_db_mel = librosa.amplitude_to_db(s, ref=np.max)
     print(s_db_mel.shape)
-    fig, ax = plt.subplots(figsize=(4.32, 2.88))
+    #fig, ax = plt.subplots(figsize=(4.32, 2.88))
+    fig, ax = plt.subplots(figsize=(2, 2))
     img = librosa.display.specshow(s_db_mel, ax=ax)
     plt.savefig(fname=Constants.INPUT_IMAGES + "/" + filename + ".png", format='png')
     # plt.show()
@@ -99,6 +100,8 @@ def audio_to_spectrograms(dir_path):
         for filename in files:
             file_path = os.path.join(root, filename)
             create_mel_spectrogram(file_path, filename[:-4])
+
+
 
 
 """def extract_genre_subdirectories(file_path, num_subdirectories=5):
@@ -117,8 +120,8 @@ if __name__ == '__main__':
     # simple_transcript()
 
     #data=preprocess_dataset(Constants.INPUT_AUDIO)
-    #createCNNmodel(data)
-    #testimagemodel(Constants.INPUT_IMAGES, Constants.CNN_IMAGE_PATH)
+    create_efficientnet_model(Constants.GTZAN_IMAGE_PATH)
+    # testimagemodel(Constants.INPUT_IMAGES, "GTZAN/GTZAN_IMAGE_CRNN6.h5")
 
-    model_build_crnn6(Constants.GTZAN_IMAGE_PATH)
+    # model_build_crnn6(Constants.GTZAN_IMAGE_PATH)
     # audio_to_spectrograms(Constants.INPUT_AUDIO)
