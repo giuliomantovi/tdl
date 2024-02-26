@@ -205,7 +205,7 @@ def unfreeze_model(model):
     )
 
 
-def create_efficientnet_model(image_folder):
+def create_pretrained_efficientnet_model(image_folder):
     x_img, y_img = load_resize_image_data(image_folder)
     label_encoder = LabelEncoder()
     y_img = label_encoder.fit_transform(y_img)
@@ -247,16 +247,48 @@ def create_efficientnet_model(image_folder):
 
     # 2 step
     unfreeze_model(model)
-    epochs = 8
+    epochs = 20
     hist = model.fit(x_train, y_train,
                      epochs=epochs,  # 100
                      validation_data=(x_val, y_val))
     plot_hist(hist)
 
     model.save("GTZAN/GTZAN_EFFICIENTNETB0.h5")
-    # y_pred = model.predict(x_img)
+    y_pred = model.predict(x_img)
     # y_pred = np.argmax(y_pred, axis=1)
-    # print(y_pred)
+    print(y_pred)
+
+
+def create_scratch_efficientnet_model(image_folder):
+    x_img, y_img = load_resize_image_data(image_folder)
+    label_encoder = LabelEncoder()
+    y_img = label_encoder.fit_transform(y_img)
+
+    x_train, x_test, y_train, y_test = train_test_split(x_img, y_img, test_size=0.22, random_state=42)
+    x_train, x_val, y_train, y_val = train_test_split(x_train, y_train, test_size=0.2, random_state=42)
+
+    # Each image in the dataset is of the shape (288, 432, 3).
+    input_shape = x_img.shape[1:]
+    print(input_shape)
+    model = tf.keras.applications.efficientnet.EfficientNetB0(
+        include_top=True,
+        weights=None,
+        input_shape=input_shape,
+    )
+    model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+
+    model.summary()
+
+    epochs = 50
+    hist = model.fit(x_train, y_train,
+                     epochs=epochs,  # 100
+                     validation_data=(x_val, y_val))
+    plot_hist(hist)
+
+    model.save("GTZAN/GTZAN_SCRATCH_EFFICIENTNETB0.h5")
+    y_pred = model.predict(x_img)
+    y_pred = np.argmax(y_pred, axis=1)
+    print(y_pred)
 
 
 def plot_hist(hist):
