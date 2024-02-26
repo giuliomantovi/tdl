@@ -120,8 +120,8 @@ if __name__ == '__main__':
     # simple_transcript()
 
     #data=preprocess_dataset(Constants.INPUT_AUDIO)
-    create_efficientnet_model(Constants.GTZAN_IMAGE_PATH)
-    # testimagemodel(Constants.INPUT_IMAGES, "GTZAN/GTZAN_IMAGE_CRNN6.h5")
+    # create_efficientnet_model(Constants.GTZAN_IMAGE_PATH)
+    testimagemodel(Constants.INPUT_IMAGES, Constants.EFFICIENTNET_PATH)
 
     # model_build_crnn6(Constants.GTZAN_IMAGE_PATH)
     # audio_to_spectrograms(Constants.INPUT_AUDIO)

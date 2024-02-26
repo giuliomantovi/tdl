@@ -140,6 +140,14 @@ def load_image_test(img_folder):
     return np.array(x)
 
 
+def load_resize_image_test(img_folder):
+    x = []
+    for root, subdirs, files in os.walk(img_folder):
+        for filename in files:
+            x = x + [cv2.resize(cv2.imread(os.path.join(root, filename)), (200, 200))]
+    return np.array(x)
+
+
 # rete neurale convoluzionale, input = spettrogrammi in png degli audio, accuracy:62%
 def createCNNimagemodel(image_folder):
     x_img, y_img = load_image_data(image_folder)
@@ -193,7 +201,7 @@ def unfreeze_model(model):
 
     optimizer = tf.keras.optimizers.Adam(learning_rate=1e-5)
     model.compile(
-        optimizer=optimizer, loss="categorical_crossentropy", metrics=["accuracy"]
+        optimizer=optimizer, loss="sparse_categorical_crossentropy", metrics=["accuracy"]
     )
 
 
@@ -228,7 +236,7 @@ def create_efficientnet_model(image_folder):
     model = tf.keras.Model(inputs, outputs, name="EfficientNet")
     optimizer = tf.keras.optimizers.Adam(learning_rate=1e-2)
     model.compile(
-        optimizer=optimizer, loss="categorical_crossentropy", metrics=["accuracy"]
+        optimizer=optimizer, loss="sparse_categorical_crossentropy", metrics=["accuracy"]
     )
 
     epochs = 50  # @param {type: "slider", min:8, max:80}
@@ -238,11 +246,11 @@ def create_efficientnet_model(image_folder):
     # plot_hist(hist)
 
     # 2 step
-    """unfreeze_model(model)
-    epochs = 4  # @param {type: "slider", min:8, max:80}
+    unfreeze_model(model)
+    epochs = 8
     hist = model.fit(x_train, y_train,
                      epochs=epochs,  # 100
-                     validation_data=(x_val, y_val))"""
+                     validation_data=(x_val, y_val))
     plot_hist(hist)
 
     model.save("GTZAN/GTZAN_EFFICIENTNETB0.h5")
@@ -303,6 +311,14 @@ def testimagemodel(images_path, model_path):
     y_pred = np.argmax(y_pred, axis=1)
     print(y_pred)
 
+
+def testefficientnetmodel(images_path, model_path):
+    x_img = load_resize_image_test(images_path)
+    model = tf.keras.models.load_model(model_path)
+    y_pred = model.predict(x_img)
+    print(y_pred)
+    y_pred = np.argmax(y_pred, axis=1)
+    print(y_pred)
 
 def most_frequent(arr):
     unique, counts = np.unique(arr, return_counts=True)
