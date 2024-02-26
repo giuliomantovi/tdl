@@ -255,7 +255,7 @@ def create_pretrained_efficientnet_model(image_folder):
 
     model.save("GTZAN/GTZAN_EFFICIENTNETB0.h5")
     y_pred = model.predict(x_img)
-    # y_pred = np.argmax(y_pred, axis=1)
+    y_pred = np.argmax(y_pred, axis=1)
     print(y_pred)
 
 
