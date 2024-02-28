@@ -7,6 +7,7 @@ from Config import Constants
 from spleeter.separator import Separator
 from faster_whisper import WhisperModel
 import whisper
+import pydub as pyd
 import matplotlib.pyplot as plt
 from model import *
 from Recorder import Recorder
@@ -88,7 +89,7 @@ def create_mel_spectrogram(audio_path, filename):
     s = librosa.feature.melspectrogram(y=y, sr=sr)
     s_db_mel = librosa.amplitude_to_db(s, ref=np.max)
     print(s_db_mel.shape)
-    #fig, ax = plt.subplots(figsize=(4.32, 2.88))
+    # fig, ax = plt.subplots(figsize=(4.32, 2.88))
     fig, ax = plt.subplots(figsize=(2, 2))
     img = librosa.display.specshow(s_db_mel, ax=ax)
     plt.savefig(fname=Constants.INPUT_IMAGES + "/" + filename + ".png", format='png')
@@ -102,6 +103,20 @@ def audio_to_spectrograms(dir_path):
             create_mel_spectrogram(file_path, filename[:-4])
 
 
+# Create function to convert audio file to wav
+def convert_to_wav(dir_path):
+    """Takes a folder of audio file of non .wav format and converts to .wav"""
+    for root, subdirs, files in os.walk(dir_path):
+        for filename in files:
+            if filename[-4:] == ".wav":
+                continue
+            if not os.path.isdir(filename):
+                audio = pyd.AudioSegment.from_file(os.path.join(root, filename))
+                new_filename = filename.split(".")[0] + ".wav"
+                new_filename = os.path.join(root, new_filename)
+                print(new_filename)
+                audio.export(new_filename, format="wav")
+                #print(f"Converting {filename} to {new_filename}...")
 
 
 """def extract_genre_subdirectories(file_path, num_subdirectories=5):
@@ -111,7 +126,6 @@ def audio_to_spectrograms(dir_path):
         subdirectories.insert(0, subdirectory)
     return subdirectories[3]"""
 
-
 if __name__ == '__main__':
     """mic = Recorder()
     mic.setMicrophone()
@@ -119,9 +133,9 @@ if __name__ == '__main__':
     # source_separation()
     # simple_transcript()
 
-    #data=preprocess_dataset(Constants.INPUT_AUDIO)
-    create_pretrained_efficientnet_model(Constants.GTZAN_IMAGE_PATH)
-    testefficientnetmodel(Constants.INPUT_IMAGES, Constants.EFFICIENTNET_PRETRAINED_PATH)
-
+    # data=preprocess_dataset(Constants.INPUT_AUDIO)
+    # create_pretrained_efficientnet_model(Constants.GTZAN_IMAGE_PATH)
+    # testefficientnetmodel(Constants.INPUT_IMAGES, Constants.EFFICIENTNET_PRETRAINED_PATH)
+    convert_to_wav(Constants.INPUT_AUDIO)
     # model_build_crnn6(Constants.GTZAN_IMAGE_PATH)
     # audio_to_spectrograms(Constants.INPUT_AUDIO)
