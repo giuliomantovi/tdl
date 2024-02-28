@@ -1,4 +1,4 @@
-pretrained_ss_models/
+pretrained_models/
 .idea/
 Config/output_audio
 Config/input

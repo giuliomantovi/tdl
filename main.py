@@ -19,9 +19,9 @@ from Recorder import Recorder
 
 # warnings.filterwarnings('ignore')
 
-def source_separation():
-    separator = Separator('spleeter:5stems')
-    separator.separate_to_file(Constants.INPUT_AUDIO + "mic_input.wav", Constants.OUTPUT_AUDIO)
+def source_separation(file_path):
+    separator = Separator('spleeter:2stems')
+    separator.separate_to_file(file_path, Constants.OUTPUT_AUDIO)
 
 
 def fast_transcript():
@@ -41,11 +41,11 @@ def fast_transcript():
         print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
 
 
-def simple_transcript():
+def simple_transcript(file_path):
     # WHISPER AI WITHOUT CUDA
     model = whisper.load_model("medium", download_root="whisper_models", in_memory=True)
 
-    result = model.transcribe(Constants.INPUT_AUDIO + "mic_input.wav")
+    result = model.transcribe(file_path)
     with (open(Constants.OUTPUT_AUDIO + "transcription.txt", "w") as f):
         print(result["text"])
         f.write(result["text"])
@@ -86,7 +86,8 @@ def create_spectrogram(audio):
 
 def create_mel_spectrogram(audio_path, filename):
     y, sr = librosa.load(audio_path)
-    s = librosa.feature.melspectrogram(y=y, sr=sr)
+    s = librosa.feature.melspectrogram(y=y, sr=sr, hop_length=308, win_length=2205,
+                                       n_mels=128, n_fft=4096, fmax=18000, norm='slaney')
     s_db_mel = librosa.amplitude_to_db(s, ref=np.max)
     print(s_db_mel.shape)
     # fig, ax = plt.subplots(figsize=(4.32, 2.88))
@@ -131,12 +132,12 @@ if __name__ == '__main__':
     """mic = Recorder()
     mic.setMicrophone()
     mic.record()"""
-    # source_separation()
-    # simple_transcript()
+    # source_separation(Constants.INPUT_AUDIO + "/country/ringoffire.wav")
+    # simple_transcript(Constants.OUTPUT_AUDIO + "ringoffire/vocals.wav")
 
     # data=preprocess_dataset(Constants.INPUT_AUDIO)
     # create_pretrained_efficientnet_model(Constants.GTZAN_IMAGE_PATH)
-    testefficientnetmodel(Constants.INPUT_IMAGES, Constants.EFFICIENTNET_PRETRAINED_PATH)
+    # testefficientnetmodel(Constants.INPUT_IMAGES, Constants.EFFICIENTNET_PRETRAINED_PATH)
     # convert_to_wav(Constants.INPUT_AUDIO)
     # model_build_crnn6(Constants.GTZAN_IMAGE_PATH)
     # audio_to_spectrograms(Constants.INPUT_AUDIO)

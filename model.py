@@ -242,7 +242,8 @@ def create_pretrained_efficientnet_model(image_folder):
     epochs = 50  # @param {type: "slider", min:8, max:80}
     hist = model.fit(x_train, y_train,
                      epochs=epochs,  # 100
-                     validation_data=(x_val, y_val))
+                     validation_data=(x_val, y_val),
+                     batch_size=64)
     # plot_hist(hist)
 
     # 2 step
@@ -250,7 +251,8 @@ def create_pretrained_efficientnet_model(image_folder):
     epochs = 20
     hist = model.fit(x_train, y_train,
                      epochs=epochs,  # 100
-                     validation_data=(x_val, y_val))
+                     validation_data=(x_val, y_val),
+                     batch_size=64)
     plot_hist(hist)
 
     model.save("GTZAN/GTZAN_EFFICIENTNETB0.h5")
@@ -279,7 +281,7 @@ def create_scratch_efficientnet_model(image_folder):
 
     model.summary()
 
-    epochs = 50
+    epochs = 100
     hist = model.fit(x_train, y_train,
                      epochs=epochs,  # 100
                      validation_data=(x_val, y_val))
