@@ -99,8 +99,9 @@ def create_mel_spectrogram(audio_path, filename):
 def audio_to_spectrograms(dir_path):
     for root, subdirs, files in os.walk(dir_path):
         for filename in files:
-            file_path = os.path.join(root, filename)
-            create_mel_spectrogram(file_path, filename[:-4])
+            if filename.endswith(".wav"):
+                file_path = os.path.join(root, filename)
+                create_mel_spectrogram(file_path, filename[:-4])
 
 
 # Create function to convert audio file to wav
@@ -135,7 +136,7 @@ if __name__ == '__main__':
 
     # data=preprocess_dataset(Constants.INPUT_AUDIO)
     # create_pretrained_efficientnet_model(Constants.GTZAN_IMAGE_PATH)
-    # testefficientnetmodel(Constants.INPUT_IMAGES, Constants.EFFICIENTNET_PRETRAINED_PATH)
-    convert_to_wav(Constants.INPUT_AUDIO)
+    testefficientnetmodel(Constants.INPUT_IMAGES, Constants.EFFICIENTNET_PRETRAINED_PATH)
+    # convert_to_wav(Constants.INPUT_AUDIO)
     # model_build_crnn6(Constants.GTZAN_IMAGE_PATH)
     # audio_to_spectrograms(Constants.INPUT_AUDIO)
