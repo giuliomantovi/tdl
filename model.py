@@ -5,6 +5,7 @@ import os
 import numpy as np
 import tensorflow as tf
 import cv2
+import sys
 import matplotlib.pyplot as plt
 from keras import layers, models
 from keras.optimizers import Adam
@@ -240,6 +241,8 @@ def create_pretrained_efficientnet_model(image_folder):
     )
 
     epochs = 50  # @param {type: "slider", min:8, max:80}
+    """ epochs frozen = 50, epochs unfrozen = 20 batch_size=64
+    loss: 0.1789 - accuracy: 0.9342 - val_loss: 1.2579 - val_accuracy: 0.7051"""
     hist = model.fit(x_train, y_train,
                      epochs=epochs,  # 100
                      validation_data=(x_val, y_val),
@@ -255,7 +258,7 @@ def create_pretrained_efficientnet_model(image_folder):
                      batch_size=64)
     plot_hist(hist)
 
-    model.save("GTZAN/GTZAN_EFFICIENTNETB0.h5")
+    model.save("GTZAN/models/GTZAN_EFFICIENTNETB0.h5")
     y_pred = model.predict(x_img)
     y_pred = np.argmax(y_pred, axis=1)
     print(y_pred)
@@ -351,8 +354,39 @@ def testefficientnetmodel(images_path, model_path):
     model = tf.keras.models.load_model(model_path)
     y_pred = model.predict(x_img)
     print(y_pred)
+    translate_predictions(y_pred)
     y_pred = np.argmax(y_pred, axis=1)
     print(y_pred)
+
+
+def translate_predictions(predictions):
+    for arr in predictions:
+        threelargest = find3largest(arr)
+        tot = sum(threelargest)
+        for i in range(len(threelargest)):
+            threelargest[i] /= tot
+        print(threelargest)
+        #N.B. OLTRE AL NUMERO DEVO RIPORTARE ANCHE L'INDICE DEL GENERE
+
+def find3largest(array, arr_size=Constants.NUM_CLASSES):
+    if arr_size < 3:
+        print(" Invalid Input ")
+        return
+    third = first = second = -sys.maxsize
+
+    for i in range(0, arr_size):
+        if array[i] > first:
+            third = second
+            second = first
+            first = array[i]
+        elif array[i] > second:
+            third = second
+            second = array[i]
+        elif array[i] > third:
+            third = array[i]
+
+    return [first, second, third]
+
 
 def most_frequent(arr):
     unique, counts = np.unique(arr, return_counts=True)

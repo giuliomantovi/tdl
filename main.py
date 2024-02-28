@@ -86,7 +86,7 @@ def create_spectrogram(audio):
 
 def create_mel_spectrogram(audio_path, filename):
     y, sr = librosa.load(audio_path)
-    s = librosa.feature.melspectrogram(y=y, sr=sr, hop_length=308, win_length=2205,
+    s = librosa.feature.melspectrogram(y=y, sr=44100, hop_length=308, win_length=2205,
                                        n_mels=128, n_fft=4096, fmax=18000, norm='slaney')
     s_db_mel = librosa.amplitude_to_db(s, ref=np.max)
     print(s_db_mel.shape)
@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
     # data=preprocess_dataset(Constants.INPUT_AUDIO)
     # create_pretrained_efficientnet_model(Constants.GTZAN_IMAGE_PATH)
-    # testefficientnetmodel(Constants.INPUT_IMAGES, Constants.EFFICIENTNET_PRETRAINED_PATH)
+    testefficientnetmodel(Constants.INPUT_IMAGES, Constants.EFFICIENTNET_PRETRAINED_PATH)
     # convert_to_wav(Constants.INPUT_AUDIO)
     # model_build_crnn6(Constants.GTZAN_IMAGE_PATH)
     # audio_to_spectrograms(Constants.INPUT_AUDIO)
