@@ -143,10 +143,12 @@ def load_image_test(img_folder):
 
 def load_resize_image_test(img_folder):
     x = []
+    names = []
     for root, subdirs, files in os.walk(img_folder):
         for filename in files:
             x = x + [cv2.resize(cv2.imread(os.path.join(root, filename)), (200, 200))]
-    return np.array(x)
+            names.append(filename)
+    return np.array(x), names
 
 
 # rete neurale convoluzionale, input = spettrogrammi in png degli audio, accuracy:62%
@@ -350,45 +352,109 @@ def testimagemodel(images_path, model_path):
 
 
 def testefficientnetmodel(images_path, model_path):
-    x_img = load_resize_image_test(images_path)
+    x_img, names = load_resize_image_test(images_path)
     model = tf.keras.models.load_model(model_path)
     y_pred = model.predict(x_img)
-    print(y_pred)
-    translate_predictions(y_pred)
-    y_pred = np.argmax(y_pred, axis=1)
-    print(y_pred)
+    translate_predictions(y_pred, names)
+    # y_pred = np.argmax(y_pred, axis=1)
 
 
-def translate_predictions(predictions):
-    for arr in predictions:
-        threelargest = find3largest(arr)
-        tot = sum(threelargest)
-        for i in range(len(threelargest)):
-            threelargest[i] /= tot
-        print(threelargest)
-        #N.B. OLTRE AL NUMERO DEVO RIPORTARE ANCHE L'INDICE DEL GENERE
+genre_dict = {0: "Blues", 1: "Classical", 2: "Country", 3: "Disco", 4: "HipHop", 5: "Jazz",
+              6: "Metal", 7: "Pop", 8: "Reggae", 9: "Rock"}
+
+
+def translate_predictions(predictions, names):
+    for i in range(len(predictions)):
+        print(names[i].split(".")[0])
+        three_largest, indexes = find3largest(predictions[i])
+        tot = sum(three_largest)
+        for j in range(len(three_largest)):
+            three_largest[j] = round(three_largest[j] / tot * 100, 0)
+        for j in range(len(three_largest)):
+            if three_largest[j] != 0.:
+                print(genre_dict[indexes[j]] + ": " + str(int(three_largest[j])) + "%")
+        print()
+
 
 def find3largest(array, arr_size=Constants.NUM_CLASSES):
     if arr_size < 3:
         print(" Invalid Input ")
         return
     third = first = second = -sys.maxsize
+    third_index = second_index = first_index = -1
 
     for i in range(0, arr_size):
         if array[i] > first:
             third = second
+            third_index = second_index
             second = first
+            second_index = first_index
             first = array[i]
+            first_index = i
         elif array[i] > second:
             third = second
+            third_index = second_index
             second = array[i]
+            second_index = i
         elif array[i] > third:
             third = array[i]
+            third_index = i
 
-    return [first, second, third]
+    return [first, second, third], [first_index, second_index, third_index]
 
 
 def most_frequent(arr):
     unique, counts = np.unique(arr, return_counts=True)
     index = np.argmax(counts)
     return unique[index]
+
+
+"""
+def plot_history(history, name):
+    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    plt.plot(history["acc"], label="Training")
+    plt.plot(history["val_acc"], label="Validation")
+    plt.legend()
+    plt.xlabel("Epoch")
+    plt.ylabel("Accuracy")
+    plt.title("Accuracy over epochs")
+    plt.savefig(os.path.join("data/plots", "{}_accuracy_{}.png".format(name, timestamp)))
+
+    plt.gcf().clear()
+
+    plt.plot(history["loss"], label="Training")
+    plt.plot(history["val_loss"], label="Validation")
+    plt.legend()
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.title("Loss over epochs")
+    plt.savefig(os.path.join("data/plots", "{}_loss_{}.png".format(name, timestamp)))
+
+
+def plot_confusion_matrix(cm, classes, cmap=plt.cm.Oranges):
+    plt.imshow(cm, interpolation='nearest', cmap=cmap)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=90)
+    plt.yticks(tick_marks, classes)
+
+    fmt = 'd'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt), horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.tight_layout()
+    plt.ylabel('True label', fontsize=14)
+    plt.xlabel('Predicted label', fontsize=14)
+
+
+def save_confusion_matrix(y_test, y_pred, name):
+    timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    cnf_matrix = confusion_matrix(y_test, y_pred)
+    np.set_printoptions(precision=2)
+    plt.figure()
+    plot_confusion_matrix(cnf_matrix, classes=genre_dict.keys())
+    plt.tight_layout()
+    plt.savefig(os.path.join("data/plots", "{}_confusion_{}.png".format(name, timestamp)))
+    """
