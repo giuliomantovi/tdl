@@ -19,26 +19,33 @@ from Recorder import Recorder
 
 # warnings.filterwarnings('ignore')
 
-def source_separation(file_path):
+def source_separation(dir_path):
     separator = Separator('spleeter:2stems')
-    separator.separate_to_file(file_path, Constants.OUTPUT_AUDIO)
+    for root, subdirs, files in os.walk(dir_path):
+        for filename in files:
+            if filename.endswith(".wav"):
+                separator.separate_to_file(os.path.join(root, filename), Constants.INPUT_TEXT)
 
 
-def fast_transcript():
-    model_size = "small"
+def fast_transcript(dir_path):
+    model_size = "medium"
     # Run on GPU with FP16
-    model = WhisperModel(model_size, device="cuda", compute_type="float16")
+    model = WhisperModel(model_size, device="cuda", compute_type="float16",
+                         download_root="whisper_models/")
 
     # or run on GPU with INT8
     # model = WhisperModel(model_size, device="cuda", compute_type="int8_float16")
     # or run on CPU with INT8
     # model = WhisperModel(model_size, device="cpu", compute_type="int8")
-    segments, info = model.transcribe(Constants.INPUT_AUDIO, beam_size=5)
-
-    print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
-
-    for segment in segments:
-        print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
+    for root, subdirs, files in os.walk(dir_path):
+        for filename in files:
+            if filename == "vocals.wav":
+                segments, info = model.transcribe(os.path.join(root, filename), beam_size=5)
+                print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
+                with (open(os.path.join(root, filename[:-4]) + ".txt", "w") as f):
+                    for segment in segments:
+                        print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
+                        f.write("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
 
 
 def simple_transcript(file_path):
@@ -118,7 +125,7 @@ def convert_to_wav(dir_path):
                 new_filename = os.path.join(root, new_filename)
                 print(new_filename)
                 audio.export(new_filename, format="wav")
-                #print(f"Converting {filename} to {new_filename}...")
+                # print(f"Converting {filename} to {new_filename}...")
 
 
 """def extract_genre_subdirectories(file_path, num_subdirectories=5):
@@ -132,12 +139,12 @@ if __name__ == '__main__':
     """mic = Recorder()
     mic.setMicrophone()
     mic.record()"""
-    # source_separation(Constants.INPUT_AUDIO + "/country/ringoffire.wav")
-    # simple_transcript(Constants.OUTPUT_AUDIO + "ringoffire/vocals.wav")
+    # source_separation(Constants.INPUT_AUDIO + "/pop")
+    fast_transcript(Constants.INPUT_TEXT)
 
     # data=preprocess_dataset(Constants.INPUT_AUDIO)
     # create_pretrained_efficientnet_model(Constants.GTZAN_IMAGE_PATH)
-    testefficientnetmodel(Constants.INPUT_IMAGES, Constants.EFFICIENTNET_PRETRAINED_PATH)
+    # testefficientnetmodel(Constants.INPUT_IMAGES, Constants.EFFICIENTNET_PRETRAINED_PATH)
     # convert_to_wav(Constants.INPUT_AUDIO)
     # model_build_crnn6(Constants.GTZAN_IMAGE_PATH)
     # audio_to_spectrograms(Constants.INPUT_AUDIO)

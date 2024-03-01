@@ -57,7 +57,7 @@ def createLSMTmodel(mfcc_data):
     model.add(tf.keras.layers.LSTM(64, input_shape=input_shape, return_sequences=True))
     model.add(tf.keras.layers.LSTM(64))
     model.add(tf.keras.layers.Dense(64, activation="relu"))
-    model.add(tf.keras.layers.Dense(10, activation="softmax"))
+    model.add(tf.keras.layers.Dense(units=Constants.NUM_CLASSES, activation="softmax"))
 
     optimiser = tf.keras.optimizers.Adam(lr=0.001)
     model.compile(optimizer=optimiser,
@@ -97,9 +97,10 @@ def createCNNmodel(mfcc_data):
         layers.Conv2D(128, (3, 3), activation='relu', padding='valid'), layers.MaxPooling2D(2, padding='same'),
         layers.Dropout(0.3),
         layers.GlobalAveragePooling2D(),
-        layers.Dense(512, activation='relu'), layers.Dense(10, activation='softmax')
+        layers.Dense(512, activation='relu'), layers.Dense(units=Constants.NUM_CLASSES, activation='softmax')
     ])
     cnn_model.compile(loss='binary_crossentropy', optimizer='adam', metrics='acc')
+    #N.B. BINARY CROSS ENTROPY???
     cnn_model.summary()
 
     history = cnn_model.fit(x_train, y_train, validation_data=(x_val, y_val), batch_size=32, epochs=50, verbose=2)
@@ -176,7 +177,7 @@ def createCNNimagemodel(image_folder):
     image_model.add(layers.Dropout(0.2))
     image_model.add(layers.Flatten())
     image_model.add(layers.Dense(128, activation="relu"))
-    image_model.add(layers.Dense(10, activation="softmax"))
+    image_model.add(layers.Dense(units=Constants.NUM_CLASSES, activation="softmax"))
     image_model.summary()
 
     opt = Adam(learning_rate=0.0001)
@@ -233,7 +234,7 @@ def create_pretrained_efficientnet_model(image_folder):
 
     top_dropout_rate = 0.2
     x = layers.Dropout(top_dropout_rate, name="top_dropout")(x)
-    outputs = layers.Dense(10, activation="softmax", name="pred")(x)
+    outputs = layers.Dense(units=Constants.NUM_CLASSES, activation="softmax", name="pred")(x)
 
     # Compile
     model = tf.keras.Model(inputs, outputs, name="EfficientNet")
