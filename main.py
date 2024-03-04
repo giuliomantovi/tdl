@@ -4,6 +4,7 @@ import pandas as pd
 
 import Recorder
 from Config import Constants
+from text_analysis import *
 from spleeter.separator import Separator
 from faster_whisper import WhisperModel
 import whisper
@@ -140,8 +141,8 @@ if __name__ == '__main__':
     mic.setMicrophone()
     mic.record()"""
     # source_separation(Constants.INPUT_AUDIO + "/pop")
-    fast_transcript(Constants.INPUT_TEXT)
-
+    # fast_transcript(Constants.INPUT_TEXT)
+    print_pickle("WASABI_DB/topics/song_id_to_topics.pickle")
     # data=preprocess_dataset(Constants.INPUT_AUDIO)
     # create_pretrained_efficientnet_model(Constants.GTZAN_IMAGE_PATH)
     # testefficientnetmodel(Constants.INPUT_IMAGES, Constants.EFFICIENTNET_PRETRAINED_PATH)
