@@ -4,3 +4,4 @@ Config/output_audio
 Config/input
 whisper_models
 GTZAN
+WASABI_DB
