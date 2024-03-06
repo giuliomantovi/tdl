@@ -11,6 +11,8 @@ from gensim.models.phrases import Phraser, Phrases
 from gensim.utils import simple_preprocess
 
 
+topics_dict = {0: ""}
+
 def sort_tuples(tuples, key_idx):
     # Step 1: Define a key function that returns the desired element of each tuple.
     key_func = lambda x: x[key_idx]
@@ -24,7 +26,8 @@ def sort_tuples(tuples, key_idx):
 def print_pickle(file):
     topic_model = joblib.load("C:/Users/Utente/UNI/tesina_LAUREA/WASABI_DB/topics/lda_model_16.jl")
     print('Topics:', '\n')
-    print(sort_tuples(topic_model.show_topics(0), 0))
+    for tup in sort_tuples(topic_model.show_topics(0), 0):
+        print(tup)
     #print(topic_model.get_topics())
 
     """obj = pd.read_pickle(file)
@@ -44,7 +47,7 @@ def evaluate_text(file):
     ### Compute topic distribution for unseen texts ###
     topic_model = joblib.load("C:/Users/Utente/UNI/tesina_LAUREA/WASABI_DB/topics/lda_model_16.jl")
     dictionary = pd.read_pickle("C:/Users/Utente/UNI/tesina_LAUREA/WASABI_DB/topics/dictionary.pickle")
-    text = "The scars of your love remind me of us, they keep me thinking that we almost had it all"
+    text = "my heart is broken and I'm weak because of the heat"
     corpus = [text]
     corpus = complex_preprocess(corpus)
     dictionary = Dictionary(corpus)
