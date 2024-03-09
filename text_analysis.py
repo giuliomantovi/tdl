@@ -42,21 +42,50 @@ def print_pickle(file):
     #song_id = random_key_from_dict(summaries, seed=12)
     print('\n'.join(summaries['5714deed25ac0d8aee57e541']))"""
 
+SOME_FREE_SONGTEXT = "So one night I said to Kathy We gotta get away somehow Go somewhere south and somewhere warm But for God's sake let's go now. And Kathy she sort of looks at me And asks where I wanna go So I look back and I hear me say I don't care but we gotta go chorus and key change And all the other people Who slepwalk thru their days Just sort of faded out of sight When we two drove away And ev'ry day we travelled We were lookin' to get wise And we learned what was the truth And we learned what were the lies And in LA we bought a bus Sort of old and not too smart So for six hundred and fifty bucks We got out and made a start We hit the road down to the South And drove into Mexico That old bus was some old wreck But it just kept us on the road. chorus etc We drove up to Alabam And a farmer gave us some jobs We worked them crops all night and day And at night we slept like dogs We got paid and Kathy said to me It's time to make a move again And when I looked into her eyes I saw more than a friend. chorus etc And now we've stopped our travels And we sold the bus in Texas And we made our home in Austin And for sure it ain't no palace And Kathy and me we settled down And now our first kid's on the way Kathy and me and that old bus We did real good to get away."
+
 
 def evaluate_text(file):
     ### Compute topic distribution for unseen texts ###
     topic_model = joblib.load("C:/Users/Utente/UNI/tesina_LAUREA/WASABI_DB/topics/lda_model_16.jl")
     dictionary = pd.read_pickle("C:/Users/Utente/UNI/tesina_LAUREA/WASABI_DB/topics/dictionary.pickle")
-    text = "my heart is broken and I'm weak because of the heat"
-    corpus = [text]
+    song_text = """When the rain is blowing in your face
+        And the whole world is on your case
+        I could offer you a warm embrace
+        To make you feel my love
+        When the evening shadows and the stars appear
+        And there is no one there to dry your tears
+        I could hold you for a million years
+        To make you feel my love
+        I know you havent made your mind up yet
+        But I will never do you wrong
+        Ive known it from the moment that we met
+        No doubt in my mind where you belong
+        Id go hungry, Id go black and blue
+        Id go crawling down the avenue
+        No, theres nothing that I wouldnt do
+        To make you feel my love
+        The storms are raging on the rolling sea
+        And on the highway of regret
+        The winds of change are blowing wild and free
+        You aint seen nothing like me yet
+        I could make you happy, make your dreams come true
+        Nothing that I wouldnt do
+        Go to the ends of the Earth for you
+        To make you feel my love
+        To make you feel my love"""
+    corpus = [song_text]
     corpus = complex_preprocess(corpus)
     dictionary = Dictionary(corpus)
     # dictionary.filter_extremes()   ### using this will filter out all words if your corpus is very small like here
     corpus_bow = [dictionary.doc2bow(text) for text in corpus]
+    print(corpus_bow)
     for text in corpus_bow:
         print('\n', topic_model[text])
+    print(dictionary[0])
 
 
+#IDEA: FARE MAPPA CON KEY=PAROLA E VALUE=TOPIC, PER OGNI LEMMA NEL CORPUS BOW INCREMENTO UN CONTATORE PER TOPIC
 def flatten_list(lst):
     return [item for sublist in lst for item in sublist]
 
