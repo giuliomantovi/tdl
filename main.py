@@ -11,6 +11,7 @@ import whisper
 import pydub as pyd
 import matplotlib.pyplot as plt
 from model import *
+import lda_model
 from Recorder import Recorder
 
 
@@ -144,7 +145,9 @@ if __name__ == '__main__':
     # fast_transcript(Constants.INPUT_TEXT)
     # print_pickle("WASABI_DB/topics/song_id_to_topics.pickle")
     print_pickle("")
-    evaluate_text("")
+    # evaluate_text("")
+    # lda_model.predict_text()
+    # create_text_classifier()
     # data=preprocess_dataset(Constants.INPUT_AUDIO)
     # create_pretrained_efficientnet_model(Constants.GTZAN_IMAGE_PATH)
     # testefficientnetmodel(Constants.INPUT_IMAGES, Constants.EFFICIENTNET_PRETRAINED_PATH)

@@ -7,7 +7,6 @@ import gensim
 from gensim.utils import simple_preprocess
 import nltk
 import gensim.corpora as corpora
-nltk.download('stopwords')
 from nltk.corpus import stopwords
 import pyLDAvis.gensim
 import pickle
@@ -21,14 +20,16 @@ def sent_to_words(sentences):
 
 
 def remove_stopwords(texts):
+    nltk.download('stopwords')
     stop_words = stopwords.words('english')
-    stop_words.extend(['from', 'subject', 're', 'edu', 'use'])
+    # stop_words.extend(['from', 'subject', 're', 'edu', 'use'])
     return [[word for word in simple_preprocess(str(doc))
              if word not in stop_words] for doc in texts]
 
 
-def preprocess_data():
-    songs = pd.read_csv('./data/NIPS Papers/papers.csv')
+def create_model():
+
+    songs = pd.read_csv('Genius_song_lyrics/song_lyrics.csv', nrows=10000)
 
     # Remove punctuation
     songs['lyrics_processed'] = \
@@ -59,14 +60,50 @@ def preprocess_data():
     # number of topics
     num_topics = 10
     # Build LDA model
-    lda_model = gensim.models.LdaMulticore(corpus=corpus,
-                                           id2word=id2word,
-                                           num_topics=num_topics)
+    lda_model = gensim.models.ldamodel.LdaModel(corpus=corpus,
+                                                id2word=id2word,
+                                                num_topics=num_topics)
     # Print the Keyword in the 10 topics
     pprint(lda_model.print_topics())
-    doc_lda = lda_model[corpus]
+    lda_model.save(fname="Genius_song_lyrics/lda_model/lda_mod")
 
-    visualize_topics(lda_model, num_topics, corpus, id2word)
+    # visualize_topics(lda_model, num_topics, corpus, id2word)
+
+
+def predict_text():
+    lda_model = gensim.models.ldamodel.LdaModel.load("Genius_song_lyrics/lda_model/lda_mod")
+    song_text = """When the rain is blowing in your face
+            And the whole world is on your case
+            I could offer you a warm embrace
+            To make you feel my love
+            When the evening shadows and the stars appear
+            And there is no one there to dry your tears
+            I could hold you for a million years
+            To make you feel my love
+            I know you havent made your mind up yet
+            But I will never do you wrong
+            Ive known it from the moment that we met
+            No doubt in my mind where you belong
+            Id go hungry, Id go black and blue
+            Id go crawling down the avenue
+            No, theres nothing that I wouldnt do
+            To make you feel my love
+            The storms are raging on the rolling sea
+            And on the highway of regret
+            The winds of change are blowing wild and free
+            You aint seen nothing like me yet
+            I could make you happy, make your dreams come true
+            Nothing that I wouldnt do
+            Go to the ends of the Earth for you
+            To make you feel my love
+            To make you feel my love"""
+    data_words = list(sent_to_words(song_text))
+    # remove stop words
+    data_words = remove_stopwords(data_words)
+    id2word = corpora.Dictionary(data_words)
+    corpus = [id2word.doc2bow(text) for text in data_words]
+
+    print('\n', lda_model[corpus][0])
 
 
 def create_wordcloud(songs):
@@ -80,7 +117,7 @@ def create_wordcloud(songs):
     wordcloud.to_image()
 
 
-def visualize_topics(lda_model,num_topics, corpus, id2word):
+def visualize_topics(lda_model, num_topics, corpus, id2word):
     # Visualize the topics
     pyLDAvis.enable_notebook()
     LDAvis_data_filepath = os.path.join('./results/ldavis_prepared_' + str(num_topics))
