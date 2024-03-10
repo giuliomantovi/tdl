@@ -9,7 +9,16 @@ import numpy as np
 import spacy as spacy
 from gensim.models.phrases import Phraser, Phrases
 from gensim.utils import simple_preprocess
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score
 
+nltk.download("punkt")
+nltk.download("stopwords")
 
 topics_dict = {0: ""}
 
@@ -116,11 +125,65 @@ def complex_preprocess(corpus):
     return lemmatized_tokens
 
 
+def preprocess_classifier_text(text):
+    tokens = word_tokenize(text)
+    stop_words = set(stopwords.words("english"))
+    filtered_tokens = [token.lower() for token in tokens if token.isalpha() and token.lower() not in stop_words]
+    stemmer = PorterStemmer()
+    stemmed_tokens = [stemmer.stem(token) for token in filtered_tokens]
+    return " ".join(stemmed_tokens)
+
+
 def create_text_classifier():
-    summaries = pd.read_pickle("C:/Users/Utente/UNI/tesina_LAUREA/WASABI_DB/topics/song_id_to_topics.pickle")
+    #Genre inference from genius lyrics and genre with
+    songs = pd.read_csv('Genius_song_lyrics/song_lyrics.csv', nrows=500)
+    X, y = songs.lyrics, songs.tag
+    X_preprocessed = [preprocess_classifier_text(text) for text in X]
+    vectorizer = TfidfVectorizer()
+    X_transformed = vectorizer.fit_transform(X_preprocessed)
+    classifier = MultinomialNB()
+    classifier.fit(X_transformed, y)
+
+    #evaluate_text_classifier(classifier, vectorizer)
+
+    # save the model to disk
+    classifier_filename = 'Genius_song_lyrics/genre_classifier.sav'
+    pickle.dump(classifier, open(classifier_filename, 'wb'))
+
+    vectorizer_filename = 'Genius_song_lyrics/vectorizer.pk'
+    pickle.dump(vectorizer, open(vectorizer_filename, 'wb'))
+
+def evaluate_text_classifier(classifier, vectorizer):
+    test_data = pd.read_csv('Genius_song_lyrics/song_lyrics.csv', nrows=500)
+    X_test, y_test = test_data.lyrics, test_data.tag
+
+    X_test_preprocessed = [preprocess_classifier_text(text) for text in X_test]
+    X_test_transformed = vectorizer.transform(X_test_preprocessed)
+
+    y_pred = classifier.predict(X_test_transformed)
+
+    accuracy = accuracy_score(y_test, y_pred)
+    print("Accuracy:", accuracy)
+
+
+def predict_genre_from_lyrics(classifier):
+    # some time later...
+
+    # load the model from disk
+    loaded_classifier = pickle.load(open("Genius_song_lyrics/genre_classifier.sav", 'rb'))
+    loaded_vectorizer = pickle.load(open("Genius_song_lyrics/vectorizer.pk", 'rb'))
+
+    X_test = "SONG"
+
+    X_test_preprocessed = [preprocess_classifier_text(text) for text in X_test]
+    X_test_transformed = loaded_vectorizer.transform(X_test_preprocessed)
+    result = loaded_classifier.predict(X_test_transformed)
+    print(result)
+
+    """summaries = pd.read_pickle("C:/Users/Utente/UNI/tesina_LAUREA/WASABI_DB/topics/song_id_to_topics.pickle")
     print(summaries["ObjectId(5714deed25ac0d8aee57e542)"])
     obj = pd.read_pickle("C:/Users/Utente/UNI/tesina_LAUREA/WASABI_DB/id_to_summary_lines.pickle")
-    print(obj["5714deed25ac0d8aee57e542"])
+    print(obj["5714deed25ac0d8aee57e542"])"""
     """[(4, 0.05279845), (8, 0.06588726), (13, 0.38976097), (16, 0.022661319), (18, 0.022483176), (27, 0.010201428), (30, 0.054924987), (32, 0.016545713), (40, 0.010497759), (41, 0.04243385), (44, 0.020272728), (47, 0.010643412), (48, 0.013438855), (51, 0.025851179), (52, 0.013056019), (55, 0.0149408085), (56, 0.010882135), (58, 0.017950308)]
 ["it ain't nothing wrong but y'all know me", "i'm a loc and my loc niggaz need me bitch", "when i'm in the club i don't see real niggaz", "i see a bunch of wannabe's in it"]"""
 
