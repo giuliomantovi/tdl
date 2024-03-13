@@ -173,7 +173,7 @@ def create_text_classifier():
     classifier = MultinomialNB()
     classifier.fit(x_transformed, y_preprocessed)
 
-    #save the model to disk
+    #save the model to disk (previous one trained on first 2 million songs, 0.46% accuracy
     classifier_filename = 'Genius_song_lyrics/genre_classifier.sav'
     pickle.dump(classifier, open(classifier_filename, 'wb'))
 

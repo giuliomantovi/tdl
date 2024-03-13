@@ -13,6 +13,7 @@ from nltk.corpus import stopwords
 import pyLDAvis.gensim
 import pickle
 import pyLDAvis
+import string
 
 
 def sent_to_words(sentences):
@@ -48,50 +49,68 @@ stopwords_dict = Counter(stop_words)
 
 def preprocess_text(text):
     # tokens = word_tokenize(text)
+
     tokens = regTokenize(text)
 
     filtered_tokens = [token.lower() for token in tokens if token.lower() not in stopwords_dict]
-
+    # print(filtered_tokens)
+    """
     # stemmed_tokens = [stemmer.stem(token) for token in filtered_tokens]
-    return " ".join(filtered_tokens)
+    return " ".join(filtered_tokens)"""
+    # print(text)
+    return filtered_tokens
 
 
-def create_model():
+def create_model_chunks():
     cont = 0
-    """data_words = []
-
-    for chunk in pd.read_csv('Genius_song_lyrics/song_lyrics.csv', engine='c', chunksize=100000, usecols=['lyrics']):
-        if cont == 3:
+    data_words = []
+    languages = []
+    song_index = 0
+    for chunk in pd.read_csv('Genius_song_lyrics/song_lyrics.csv',
+                             engine='c', chunksize=10000, usecols=['lyrics', 'language']):
+        if cont == 5:
             break
         print(chunk)
         t = time()
         cont += 1
-        # Remove punctuation
-        lyrics = chunk['lyrics'].map(lambda x: re.sub('[,\.!?]', '', x))
-        # Convert the titles to lowercase
-        #lyrics = lyrics.map(lambda x: x.lower())
-        # Print out the first rows of papers
-        # lyrics.head()
-        print(lyrics)
-        #data = lyrics.values.tolist()
+        language = chunk['language']
+        indexes = []
+        #removing all song texts that aren't english
+        for i in range(song_index, song_index + len(chunk)):
+            if language[i] != 'en':
+                indexes.append(i - song_index)
+        song_index += len(chunk)
+        chunk = chunk.drop(index=chunk.index[indexes])
 
+        lyrics = chunk['lyrics']
+        language = chunk['language']
         # create_wordcloud(songs)
-
-        #data_words = list(sent_to_words(data))
-        # remove stop words
+        languages += [x for x in language]
         data_words += [preprocess_text(text) for text in lyrics]
-        # print(data_words[:1][0][:30])
-        print("Time for a chunk")
-        print(time() - t)
 
     # Create Dictionary
+    print(languages)
     id2word = corpora.Dictionary(data_words)
+    id2word.filter_extremes()
     # Create Corpus
     texts = data_words
     # Term Document Frequency
-    corpus = [id2word.doc2bow(text) for text in texts]"""
+    corpus = [id2word.doc2bow(text) for text in texts]
 
-    songs = pd.read_csv('Genius_song_lyrics/song_lyrics.csv', nrows=100)
+    num_topics = 10
+    # Build LDA model
+    lda_model = gensim.models.ldamodel.LdaModel(corpus=corpus,
+                                                id2word=id2word,
+                                                num_topics=num_topics)
+    # Print the Keyword in the 10 topics
+    pprint(lda_model.print_topics())
+    #lda_model.save(fname="Genius_song_lyrics/lda_model_chunks/lda_mod")
+
+    # visualize_topics(lda_model, num_topics, corpus, id2word)
+
+
+def create_model():
+    songs = pd.read_csv('Genius_song_lyrics/song_lyrics.csv', nrows=20)
 
     # Remove punctuation
     songs['lyrics_processed'] = \
@@ -99,17 +118,20 @@ def create_model():
     # Convert the titles to lowercase
     songs['lyrics_processed'] = \
         songs['lyrics_processed'].map(lambda x: x.lower())
+
     # Print out the first rows of papers
-    #songs['lyrics_processed'].head()
+    # songs['lyrics_processed'].head()
 
-    #create_wordcloud(songs)
+    # create_wordcloud(songs)
 
-    data = songs.lyrics_processed.values.tolist()
+    data = songs.lyrics_processed.values.tolist()  # ['song1','song2','song3']
+
     data_words = list(sent_to_words(data))
-    print(data_words[0])
+    # print(data_words) #[['token1','token2],['token1','token2']]
+    # print(data_words[0])
     # remove stop words
-    data_words = remove_stopwords(data_words)
-    print(data_words[:1][0][:30])
+    data_words = remove_stopwords(data_words)  # uguale a prima
+    print(data_words)
 
     # Create Dictionary
     id2word = corpora.Dictionary(data_words)
@@ -118,8 +140,8 @@ def create_model():
     # Term Document Frequency
     corpus = [id2word.doc2bow(text) for text in texts]
     # View
-    #print(corpus)
-    print(corpus[1])
+    # print(corpus)
+    # print(corpus[1])
 
     # number of topics
     num_topics = 10
@@ -128,7 +150,7 @@ def create_model():
                                                 id2word=id2word,
                                                 num_topics=num_topics)
     # Print the Keyword in the 10 topics
-    pprint(lda_model.print_topics())
+    # pprint(lda_model.print_topics())
     # lda_model.save(fname="Genius_song_lyrics/lda_model/lda_mod")
 
     # visualize_topics(lda_model, num_topics, corpus, id2word)
@@ -201,3 +223,21 @@ def visualize_topics(lda_model, num_topics, corpus, id2word):
         LDAvis_prepared = pickle.load(f)
     pyLDAvis.save_html(LDAvis_prepared, './results/ldavis_prepared_' + str(num_topics) + '.html')
     LDAvis_prepared
+
+
+# lda model con 50000 canzoni:
+"""[(0,
+  '0.010*"life" + 0.009*"never" + 0.008*"love" + 0.006*"hook" + 0.005*"say" + '
+  '0.005*"way" + 0.005*"day" + 0.005*"could" + 0.004*"still" + 0.004*"would"'),
+ (1,
+  '0.008*"yo" + 0.004*"ya" + 0.004*"rock" + 0.004*"rap" + 0.004*"em" + '
+  '0.003*"black" + 0.003*"yeah" + 0.003*"mic" + 0.003*"hook" + 0.003*"new"'),
+ (2,
+  '0.027*"la" + 0.021*"ich" + 0.019*"de" + 0.016*"und" + 0.015*"j" + '
+  '0.014*"du" + 0.013*"les" + 0.012*"le" + 0.012*"die" + 0.011*"est"'),
+ (3,
+  '0.019*"yeah" + 0.015*"baby" + 0.014*"oh" + 0.013*"girl" + 0.010*"love" + '
+  '0.010*"wanna" + 0.009*"uh" + 0.009*"ya" + 0.008*"want" + 0.008*"chorus"'),
+ (4,
+  '0.024*"nigga" + 0.020*"niggas" + 0.013*"fuck" + 0.011*"bitch" + 0.010*"ya" '
+  '+ 0.008*"em" + 0.007*"ass" + 0.005*"yo" + 0.005*"money" + 0.005*"hook"')]"""

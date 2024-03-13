@@ -147,7 +147,7 @@ if __name__ == '__main__':
     # print_pickle("")
     # evaluate_text("")
     # lda_model.predict_text()
-    create_text_classifier()
+    lda_model.create_model_chunks()
     # predict_genre_from_lyrics()
     # lda_model.create_model()
     # evaluate_text_classifier() 46%
