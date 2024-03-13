@@ -22,6 +22,7 @@ nltk.download("stopwords")
 
 topics_dict = {0: ""}
 
+
 def sort_tuples(tuples, key_idx):
     # Step 1: Define a key function that returns the desired element of each tuple.
     key_func = lambda x: x[key_idx]
@@ -37,7 +38,7 @@ def print_pickle(file):
     print('Topics:', '\n')
     for tup in sort_tuples(topic_model.show_topics(0), 0):
         print(tup)
-    #print(topic_model.get_topics())
+    # print(topic_model.get_topics())
 
     """obj = pd.read_pickle(file)
     print(obj['ObjectId(5714deed25ac0d8aee57e541)'])
@@ -50,6 +51,7 @@ def print_pickle(file):
     summaries = pd.read_pickle("C:/Users/Utente/UNI/tesina_LAUREA/WASABI_DB/id_to_summary_lines.pickle")
     #song_id = random_key_from_dict(summaries, seed=12)
     print('\n'.join(summaries['5714deed25ac0d8aee57e541']))"""
+
 
 SOME_FREE_SONGTEXT = "So one night I said to Kathy We gotta get away somehow Go somewhere south and somewhere warm But for God's sake let's go now. And Kathy she sort of looks at me And asks where I wanna go So I look back and I hear me say I don't care but we gotta go chorus and key change And all the other people Who slepwalk thru their days Just sort of faded out of sight When we two drove away And ev'ry day we travelled We were lookin' to get wise And we learned what was the truth And we learned what were the lies And in LA we bought a bus Sort of old and not too smart So for six hundred and fifty bucks We got out and made a start We hit the road down to the South And drove into Mexico That old bus was some old wreck But it just kept us on the road. chorus etc We drove up to Alabam And a farmer gave us some jobs We worked them crops all night and day And at night we slept like dogs We got paid and Kathy said to me It's time to make a move again And when I looked into her eyes I saw more than a friend. chorus etc And now we've stopped our travels And we sold the bus in Texas And we made our home in Austin And for sure it ain't no palace And Kathy and me we settled down And now our first kid's on the way Kathy and me and that old bus We did real good to get away."
 
@@ -94,7 +96,7 @@ def evaluate_text(file):
     print(dictionary[0])
 
 
-#IDEA: FARE MAPPA CON KEY=PAROLA E VALUE=TOPIC, PER OGNI LEMMA NEL CORPUS BOW INCREMENTO UN CONTATORE PER TOPIC
+# IDEA: FARE MAPPA CON KEY=PAROLA E VALUE=TOPIC, PER OGNI LEMMA NEL CORPUS BOW INCREMENTO UN CONTATORE PER TOPIC
 def flatten_list(lst):
     return [item for sublist in lst for item in sublist]
 
@@ -125,58 +127,119 @@ def complex_preprocess(corpus):
     return lemmatized_tokens
 
 
+import re
+
+WORD = re.compile(r'\w+')
+
+
+def regTokenize(text):
+    words = WORD.findall(text)
+    return words
+
+
+stop_words = set(stopwords.words("english"))
+stemmer = PorterStemmer()
+from collections import Counter
+stopwords_dict = Counter(stop_words)
 def preprocess_classifier_text(text):
-    tokens = word_tokenize(text)
-    stop_words = set(stopwords.words("english"))
-    filtered_tokens = [token.lower() for token in tokens if token.isalpha() and token.lower() not in stop_words]
-    stemmer = PorterStemmer()
-    stemmed_tokens = [stemmer.stem(token) for token in filtered_tokens]
-    return " ".join(stemmed_tokens)
+    # tokens = word_tokenize(text)
+    tokens = regTokenize(text)
+
+    filtered_tokens = [token.lower() for token in tokens if token.lower() not in stopwords_dict]
+
+    #stemmed_tokens = [stemmer.stem(token) for token in filtered_tokens]
+    return " ".join(filtered_tokens)
 
 
 def create_text_classifier():
-    #Genre inference from genius lyrics and genre with
-    songs = pd.read_csv('Genius_song_lyrics/song_lyrics.csv', nrows=500)
-    X, y = songs.lyrics, songs.tag
-    X_preprocessed = [preprocess_classifier_text(text) for text in X]
+    # Genre inference from genius lyrics and genre with
+    cont = 0
+    x_preprocessed = []
+    y_preprocessed = []
+    y=any
+    for chunk in pd.read_csv('Genius_song_lyrics/song_lyrics.csv',
+                             engine='c', chunksize=100000, usecols=['lyrics', 'tag']):
+        if cont == 50:
+            break
+        print(chunk)
+        cont += 1
+        x, y = chunk.lyrics, chunk.tag
+        y_preprocessed += [genre for genre in y]
+        x_preprocessed += [preprocess_classifier_text(text) for text in x]
+    #print(x_preprocessed)
+
     vectorizer = TfidfVectorizer()
-    X_transformed = vectorizer.fit_transform(X_preprocessed)
+    x_transformed = vectorizer.fit_transform(x_preprocessed)
     classifier = MultinomialNB()
-    classifier.fit(X_transformed, y)
+    classifier.fit(x_transformed, y_preprocessed)
 
-    #evaluate_text_classifier(classifier, vectorizer)
-
-    # save the model to disk
+    #save the model to disk
     classifier_filename = 'Genius_song_lyrics/genre_classifier.sav'
     pickle.dump(classifier, open(classifier_filename, 'wb'))
 
     vectorizer_filename = 'Genius_song_lyrics/vectorizer.pk'
     pickle.dump(vectorizer, open(vectorizer_filename, 'wb'))
+    #evaluate_text_classifier()
 
-def evaluate_text_classifier(classifier, vectorizer):
-    test_data = pd.read_csv('Genius_song_lyrics/song_lyrics.csv', nrows=500)
-    X_test, y_test = test_data.lyrics, test_data.tag
 
-    X_test_preprocessed = [preprocess_classifier_text(text) for text in X_test]
-    X_test_transformed = vectorizer.transform(X_test_preprocessed)
+def evaluate_text_classifier():
+    loaded_classifier = pickle.load(open("Genius_song_lyrics/genre_classifier.sav", 'rb'))
+    loaded_vectorizer = pickle.load(open("Genius_song_lyrics/vectorizer.pk", 'rb'))
 
-    y_pred = classifier.predict(X_test_transformed)
+    cont = 0
+    x_preprocessed = []
+    y_preprocessed = []
+    y = any
+    for chunk in pd.read_csv('Genius_song_lyrics/song_lyrics.csv', engine='c', chunksize=100000):
+        if cont == 20:
+            #print(chunk)
+            x, y = chunk.lyrics, chunk.tag
+            y_preprocessed += [genre for genre in y]
+            x_preprocessed += [preprocess_classifier_text(text) for text in x]
+            break
+        cont += 1
 
-    accuracy = accuracy_score(y_test, y_pred)
+    #test_data = pd.read_csv('Genius_song_lyrics/song_lyrics.csv', engine='c')
+    #x_test, y_test = test_data.lyrics[2000000:2001000], test_data.tag[2000000:2001000]
+
+    x_test_transformed = loaded_vectorizer.transform(x_preprocessed)
+
+    y_pred = loaded_classifier.predict(x_test_transformed)
+
+    accuracy = accuracy_score(y_preprocessed, y_pred)
     print("Accuracy:", accuracy)
 
 
-def predict_genre_from_lyrics(classifier):
-    # some time later...
-
+def predict_genre_from_lyrics():
     # load the model from disk
     loaded_classifier = pickle.load(open("Genius_song_lyrics/genre_classifier.sav", 'rb'))
     loaded_vectorizer = pickle.load(open("Genius_song_lyrics/vectorizer.pk", 'rb'))
 
-    X_test = "SONG"
+    X_test = """Buddy, you're a boy, make a big noise
+            Playing in the street, gonna be a big man someday
+            You got mud on your face, you big disgrace
+            Kicking your can all over the place, singin'
+            We will, we will rock you
+            We will, we will rock you
+            Buddy, you're a young man, hard man
+            Shouting in the street, gonna take on the world someday
+            You got blood on your face, you big disgrace
+            Waving your banner all over the place
+            We will, we will rock you, sing it
+            We will, we will rock you
+            Buddy, you're an old man, poor man
+            Pleading with your eyes, gonna make you some peace someday
+            You got mud on your face, big disgrace
+            Somebody better put you back into your place
+            We will, we will rock you, sing it
+            We will, we will rock you, everybody
+            We will, we will rock you, hmm
+            We will, we will rock you
+            Alright"""
 
     X_test_preprocessed = [preprocess_classifier_text(text) for text in X_test]
     X_test_transformed = loaded_vectorizer.transform(X_test_preprocessed)
+    #print(X_test_transformed)
     result = loaded_classifier.predict(X_test_transformed)
     print(result)
 

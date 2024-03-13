@@ -1,3 +1,5 @@
+from time import time
+
 import pandas as pd
 import os
 import re
@@ -19,17 +21,77 @@ def sent_to_words(sentences):
         yield gensim.utils.simple_preprocess(str(sentence), deacc=True)
 
 
+nltk.download('stopwords')
+stop_words = stopwords.words('english')
+
+
 def remove_stopwords(texts):
-    nltk.download('stopwords')
-    stop_words = stopwords.words('english')
     # stop_words.extend(['from', 'subject', 're', 'edu', 'use'])
     return [[word for word in simple_preprocess(str(doc))
              if word not in stop_words] for doc in texts]
 
 
-def create_model():
+import re
 
-    songs = pd.read_csv('Genius_song_lyrics/song_lyrics.csv', nrows=10000)
+WORD = re.compile(r'\w+')
+
+
+def regTokenize(text):
+    words = WORD.findall(text)
+    return words
+
+
+from collections import Counter
+
+stopwords_dict = Counter(stop_words)
+
+
+def preprocess_text(text):
+    # tokens = word_tokenize(text)
+    tokens = regTokenize(text)
+
+    filtered_tokens = [token.lower() for token in tokens if token.lower() not in stopwords_dict]
+
+    # stemmed_tokens = [stemmer.stem(token) for token in filtered_tokens]
+    return " ".join(filtered_tokens)
+
+
+def create_model():
+    cont = 0
+    """data_words = []
+
+    for chunk in pd.read_csv('Genius_song_lyrics/song_lyrics.csv', engine='c', chunksize=100000, usecols=['lyrics']):
+        if cont == 3:
+            break
+        print(chunk)
+        t = time()
+        cont += 1
+        # Remove punctuation
+        lyrics = chunk['lyrics'].map(lambda x: re.sub('[,\.!?]', '', x))
+        # Convert the titles to lowercase
+        #lyrics = lyrics.map(lambda x: x.lower())
+        # Print out the first rows of papers
+        # lyrics.head()
+        print(lyrics)
+        #data = lyrics.values.tolist()
+
+        # create_wordcloud(songs)
+
+        #data_words = list(sent_to_words(data))
+        # remove stop words
+        data_words += [preprocess_text(text) for text in lyrics]
+        # print(data_words[:1][0][:30])
+        print("Time for a chunk")
+        print(time() - t)
+
+    # Create Dictionary
+    id2word = corpora.Dictionary(data_words)
+    # Create Corpus
+    texts = data_words
+    # Term Document Frequency
+    corpus = [id2word.doc2bow(text) for text in texts]"""
+
+    songs = pd.read_csv('Genius_song_lyrics/song_lyrics.csv', nrows=100)
 
     # Remove punctuation
     songs['lyrics_processed'] = \
@@ -38,12 +100,13 @@ def create_model():
     songs['lyrics_processed'] = \
         songs['lyrics_processed'].map(lambda x: x.lower())
     # Print out the first rows of papers
-    songs['lyrics_processed'].head()
+    #songs['lyrics_processed'].head()
 
-    create_wordcloud(songs)
+    #create_wordcloud(songs)
 
     data = songs.lyrics_processed.values.tolist()
     data_words = list(sent_to_words(data))
+    print(data_words[0])
     # remove stop words
     data_words = remove_stopwords(data_words)
     print(data_words[:1][0][:30])
@@ -55,7 +118,8 @@ def create_model():
     # Term Document Frequency
     corpus = [id2word.doc2bow(text) for text in texts]
     # View
-    print(corpus[:1][0][:30])
+    #print(corpus)
+    print(corpus[1])
 
     # number of topics
     num_topics = 10
@@ -65,9 +129,14 @@ def create_model():
                                                 num_topics=num_topics)
     # Print the Keyword in the 10 topics
     pprint(lda_model.print_topics())
-    lda_model.save(fname="Genius_song_lyrics/lda_model/lda_mod")
+    # lda_model.save(fname="Genius_song_lyrics/lda_model/lda_mod")
 
     # visualize_topics(lda_model, num_topics, corpus, id2word)
+
+
+def print_topics():
+    lda_model = gensim.models.ldamodel.LdaModel.load("Genius_song_lyrics/lda_model/lda_mod")
+    pprint(lda_model.print_topics())
 
 
 def predict_text():

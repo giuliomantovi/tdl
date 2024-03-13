@@ -148,6 +148,9 @@ if __name__ == '__main__':
     # evaluate_text("")
     # lda_model.predict_text()
     create_text_classifier()
+    # predict_genre_from_lyrics()
+    # lda_model.create_model()
+    # evaluate_text_classifier() 46%
     # data=preprocess_dataset(Constants.INPUT_AUDIO)
     # create_pretrained_efficientnet_model(Constants.GTZAN_IMAGE_PATH)
     # testefficientnetmodel(Constants.INPUT_IMAGES, Constants.EFFICIENTNET_PRETRAINED_PATH)
