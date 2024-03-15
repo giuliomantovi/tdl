@@ -14,6 +14,14 @@ import pyLDAvis.gensim
 import pickle
 import pyLDAvis
 import string
+from collections import Counter
+
+nltk.download('stopwords')
+stop_words = stopwords.words('english')
+stop_words.extend(['1', '2', 'yeah', 'la', 'ah', 'oh', 'na', 'da',
+                   'hey', 'got', 'go', 'one', 'em', 'v', 'let', 'ooh', 'would', 'say', 'take', 'see', 'said',
+                   'chorus', 'intro', 'verse', 'produced'])
+stopwords_dict = Counter(stop_words)
 
 
 def sent_to_words(sentences):
@@ -22,14 +30,10 @@ def sent_to_words(sentences):
         yield gensim.utils.simple_preprocess(str(sentence), deacc=True)
 
 
-nltk.download('stopwords')
-stop_words = stopwords.words('english')
-
-
 def remove_stopwords(texts):
     # stop_words.extend(['from', 'subject', 're', 'edu', 'use'])
     return [[word for word in simple_preprocess(str(doc))
-             if word not in stop_words] for doc in texts]
+             if word not in stopwords_dict] for doc in texts]
 
 
 import re
@@ -40,11 +44,6 @@ WORD = re.compile(r'\w+')
 def regTokenize(text):
     words = WORD.findall(text)
     return words
-
-
-from collections import Counter
-
-stopwords_dict = Counter(stop_words)
 
 
 def preprocess_text(text):
@@ -67,15 +66,15 @@ def create_model_chunks():
     languages = []
     song_index = 0
     for chunk in pd.read_csv('Genius_song_lyrics/song_lyrics.csv',
-                             engine='c', chunksize=10000, usecols=['lyrics', 'language']):
-        if cont == 50:
+                             engine='c', chunksize=100000, usecols=['lyrics', 'language']):
+        if cont == 5:
             break
         print(chunk)
         t = time()
         cont += 1
         language = chunk['language']
         indexes = []
-        #removing all song texts that aren't english
+        # removing all song texts that aren't english
         for i in range(song_index, song_index + len(chunk)):
             if language[i] != 'en':
                 indexes.append(i - song_index)
@@ -89,7 +88,7 @@ def create_model_chunks():
         data_words += [preprocess_text(text) for text in lyrics]
 
     # Create Dictionary
-    #print(languages)
+    # print(languages)
     id2word = corpora.Dictionary(data_words)
     id2word.filter_extremes()
     # Create Corpus
@@ -97,14 +96,14 @@ def create_model_chunks():
     # Term Document Frequency
     corpus = [id2word.doc2bow(text) for text in texts]
 
-    num_topics = 5
+    num_topics = 4
     # Build LDA model
     lda_model = gensim.models.ldamodel.LdaModel(corpus=corpus,
                                                 id2word=id2word,
                                                 num_topics=num_topics)
     # Print the Keyword in the 10 topics
     pprint(lda_model.print_topics())
-    #lda_model.save(fname="Genius_song_lyrics/lda_model_chunks/lda_mod")
+    lda_model.save(fname="Genius_song_lyrics/lda_model/lda_mod")
 
     # visualize_topics(lda_model, num_topics, corpus, id2word)
 
@@ -131,13 +130,16 @@ def create_model():
     # print(data_words[0])
     # remove stop words
     data_words = remove_stopwords(data_words)  # uguale a prima
-    print(data_words)
+    #print(data_words)
 
     # Create Dictionary
     id2word = corpora.Dictionary(data_words)
     # Create Corpus
     texts = data_words
     # Term Document Frequency
+    for text in texts:
+        print(text)
+        break
     corpus = [id2word.doc2bow(text) for text in texts]
     # View
     # print(corpus)
@@ -163,35 +165,49 @@ def print_topics():
 
 def predict_text():
     lda_model = gensim.models.ldamodel.LdaModel.load("Genius_song_lyrics/lda_model/lda_mod")
-    song_text = """When the rain is blowing in your face
-            And the whole world is on your case
-            I could offer you a warm embrace
-            To make you feel my love
-            When the evening shadows and the stars appear
-            And there is no one there to dry your tears
-            I could hold you for a million years
-            To make you feel my love
-            I know you havent made your mind up yet
-            But I will never do you wrong
-            Ive known it from the moment that we met
-            No doubt in my mind where you belong
-            Id go hungry, Id go black and blue
-            Id go crawling down the avenue
-            No, theres nothing that I wouldnt do
-            To make you feel my love
-            The storms are raging on the rolling sea
-            And on the highway of regret
-            The winds of change are blowing wild and free
-            You aint seen nothing like me yet
-            I could make you happy, make your dreams come true
-            Nothing that I wouldnt do
-            Go to the ends of the Earth for you
-            To make you feel my love
-            To make you feel my love"""
-    data_words = list(sent_to_words(song_text))
+    song_text = """Celebrate, Jesus celebrate
+Celebrate, Jesus celebrate
+Celebrate, Jesus celebrate
+Celebrate, Jesus celebrate
+He is risen, He is risen
+And He lives forevermore
+He is risen, He is risen
+Come on and celebrate
+The resurrection of our Lord
+Celebrate, Jesus celebrate
+Celebrate, Jesus celebrate
+Celebrate, Jesus celebrate
+Celebrate, Jesus celebrate
+He is risen, He is risen
+And He lives forevermore
+He is risen, He is risen
+Come on and celebrate
+Come on
+The resurrection of our Lord
+Celebrate, Jesus celebrate
+Celebrate, Jesus celebrate
+Celebrate, Jesus celebrate
+Celebrate, Jesus celebrate
+He is risen, He is risen
+And He lives forevermore
+He is risen, He is risen
+Come on and celebrate
+Come on and celebrate
+Come on and celebrate
+The resurrection of our Lord
+He is risen, He is risen
+And He lives forevermore
+He is risen, He is risen
+Come on and celebrate
+Come on and celebrate
+Come on and celebrate
+The resurrection of our Lord"""
+    #data_words = list(sent_to_words(song_text))
     # remove stop words
-    data_words = remove_stopwords(data_words)
-    id2word = corpora.Dictionary(data_words)
+    #data_words = remove_stopwords(data_words)
+    data_words = [preprocess_text(song_text)]
+    print(data_words)
+    id2word = corpora.Dictionary.load("Genius_song_lyrics/lda_model/lda_mod.id2word")
     corpus = [id2word.doc2bow(text) for text in data_words]
 
     print('\n', lda_model[corpus][0])
@@ -205,7 +221,7 @@ def create_wordcloud(songs):
     # Generate a word cloud
     wordcloud.generate(long_string)
     # Visualize the word cloud
-    wordcloud.to_image()
+    wordcloud.to_image().save("Genius_song_lyrics/lda_model/wordcloud.png")
 
 
 def visualize_topics(lda_model, num_topics, corpus, id2word):
@@ -225,37 +241,18 @@ def visualize_topics(lda_model, num_topics, corpus, id2word):
     LDAvis_prepared
 
 
-# lda model con 50000 canzoni:
-"""[(0,
-  '0.010*"life" + 0.009*"never" + 0.008*"love" + 0.006*"hook" + 0.005*"say" + '
-  '0.005*"way" + 0.005*"day" + 0.005*"could" + 0.004*"still" + 0.004*"would"'),
- (1,
-  '0.008*"yo" + 0.004*"ya" + 0.004*"rock" + 0.004*"rap" + 0.004*"em" + '
-  '0.003*"black" + 0.003*"yeah" + 0.003*"mic" + 0.003*"hook" + 0.003*"new"'),
- (2,
-  '0.027*"la" + 0.021*"ich" + 0.019*"de" + 0.016*"und" + 0.015*"j" + '
-  '0.014*"du" + 0.013*"les" + 0.012*"le" + 0.012*"die" + 0.011*"est"'),
- (3,
-  '0.019*"yeah" + 0.015*"baby" + 0.014*"oh" + 0.013*"girl" + 0.010*"love" + '
-  '0.010*"wanna" + 0.009*"uh" + 0.009*"ya" + 0.008*"want" + 0.008*"chorus"'),
- (4,
-  '0.024*"nigga" + 0.020*"niggas" + 0.013*"fuck" + 0.011*"bitch" + 0.010*"ya" '
-  '+ 0.008*"em" + 0.007*"ass" + 0.005*"yo" + 0.005*"money" + 0.005*"hook"')]"""
-
-"""500 000 con 5 argomenti da portatile
-[(0,
-  '0.007*"people" + 0.005*"new" + 0.004*"one" + 0.003*"music" + 0.003*"big" + '
-  '0.003*"think" + 0.003*"1" + 0.003*"2" + 0.003*"right" + 0.003*"going"'),
- (1,
-  '0.005*"one" + 0.005*"shall" + 0.005*"may" + 0.004*"would" + 0.004*"upon" + '
-  '0.004*"god" + 0.003*"must" + 0.003*"us" + 0.003*"power" + 0.003*"men"'),
- (2,
-  '0.030*"love" + 0.023*"oh" + 0.018*"chorus" + 0.015*"baby" + 0.013*"yeah" + '
-  '0.013*"let" + 0.013*"go" + 0.012*"got" + 0.012*"want" + 0.011*"time"'),
- (3,
-  '0.021*"got" + 0.012*"shit" + 0.011*"fuck" + 0.010*"nigga" + 0.008*"em" + '
-  '0.008*"bitch" + 0.008*"man" + 0.007*"niggas" + 0.007*"cause" + '
-  '0.007*"money"'),
- (4,
-  '0.009*"one" + 0.007*"life" + 0.007*"never" + 0.007*"see" + 0.007*"said" + '
-  '0.006*"time" + 0.005*"could" + 0.005*"would" + 0.005*"away" + 0.005*"day"')]"""
+"""MODELLO CORRENTE: 500 000 con 4 argomenti 
+[(0, RELIGION, LIFE
+  '0.006*"god" + 0.006*"man" + 0.005*"us" + 0.004*"upon" + 0.003*"shall" + '
+  '0.003*"life" + 0.003*"men" + 0.003*"death" + 0.003*"lord" + 0.003*"must"'),
+ (1, LOVE, TIME
+  '0.018*"love" + 0.010*"time" + 0.010*"never" + 0.008*"baby" + 0.008*"way" + '
+  '0.008*"want" + 0.007*"come" + 0.007*"life" + 0.007*"back" + 0.007*"away"'),
+ (2, PEOPLE, WORLD
+  '0.005*"people" + 0.004*"new" + 0.003*"state" + 0.003*"may" + 0.002*"time" + '
+  '0.002*"world" + 0.002*"also" + 0.002*"first" + 0.002*"court" + '
+  '0.002*"american"'),
+ (3, HIPHOP/RAP
+  '0.010*"shit" + 0.009*"fuck" + 0.009*"nigga" + 0.008*"man" + 0.007*"ya" + '
+  '0.006*"bitch" + 0.006*"cause" + 0.006*"niggas" + 0.006*"money" + '
+  '0.005*"back"')]"""

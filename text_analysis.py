@@ -146,9 +146,9 @@ def preprocess_classifier_text(text):
     tokens = regTokenize(text)
 
     filtered_tokens = [token.lower() for token in tokens if token.lower() not in stopwords_dict]
-
-    #stemmed_tokens = [stemmer.stem(token) for token in filtered_tokens]
-    return " ".join(filtered_tokens)
+    # stemmed removed for classifier creations because it takes too much time
+    stemmed_tokens = [stemmer.stem(token) for token in filtered_tokens]
+    return " ".join(stemmed_tokens)
 
 
 def create_text_classifier():
@@ -173,7 +173,7 @@ def create_text_classifier():
     classifier = MultinomialNB()
     classifier.fit(x_transformed, y_preprocessed)
 
-    #save the model to disk (previous one trained on first 2 million songs, 0.46% accuracy
+    #save the model to disk (current one trained on first 2 million songs, 0.46% accuracy
     classifier_filename = 'Genius_song_lyrics/genre_classifier.sav'
     pickle.dump(classifier, open(classifier_filename, 'wb'))
 
@@ -310,3 +310,17 @@ def predict_genre_from_lyrics():
 (57, '0.268*"look" + 0.213*"know" + 0.070*"see" + 0.039*"shine" + 0.034*"mine" + 0.027*"just" + 0.024*"when" + 0.017*"dirty" + 0.015*"make" + 0.015*"na_na"')
 (58, '0.030*"fight" + 0.024*"war" + 0.013*"sell" + 0.009*"control" + 0.008*"state" + 0.007*"law" + 0.007*"fucking" + 0.007*"machine" + 0.006*"soldier" + 0.006*"tv"')
 (59, '0.191*"hold" + 0.159*"d" + 0.121*"place" + 0.055*"arm" + 0.041*"just" + 0.031*"tight" + 0.029*"when" + 0.028*"hand" + 0.028*"know" + 0.025*"wouldn"')"""
+
+
+def compute_text_similarity(text1, text2):
+    nlp = spacy.load("en_core_web_lg")
+    text1 = "I play piano in this ugly room"
+    text2 = "I repair the guitar in this reed world"
+    text1 = preprocess_classifier_text(text1)
+    text2 = preprocess_classifier_text(text2)
+    #print(text1)
+    #print(text2)
+    # nlp = en_core_web_sm.load()
+    t1 = nlp(text1)
+    t2 = nlp(text2)
+    print(t1.similarity(t2))
