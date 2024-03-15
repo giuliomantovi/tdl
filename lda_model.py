@@ -68,7 +68,7 @@ def create_model_chunks():
     song_index = 0
     for chunk in pd.read_csv('Genius_song_lyrics/song_lyrics.csv',
                              engine='c', chunksize=10000, usecols=['lyrics', 'language']):
-        if cont == 5:
+        if cont == 50:
             break
         print(chunk)
         t = time()
@@ -89,7 +89,7 @@ def create_model_chunks():
         data_words += [preprocess_text(text) for text in lyrics]
 
     # Create Dictionary
-    print(languages)
+    #print(languages)
     id2word = corpora.Dictionary(data_words)
     id2word.filter_extremes()
     # Create Corpus
@@ -97,7 +97,7 @@ def create_model_chunks():
     # Term Document Frequency
     corpus = [id2word.doc2bow(text) for text in texts]
 
-    num_topics = 10
+    num_topics = 5
     # Build LDA model
     lda_model = gensim.models.ldamodel.LdaModel(corpus=corpus,
                                                 id2word=id2word,
@@ -241,3 +241,21 @@ def visualize_topics(lda_model, num_topics, corpus, id2word):
  (4,
   '0.024*"nigga" + 0.020*"niggas" + 0.013*"fuck" + 0.011*"bitch" + 0.010*"ya" '
   '+ 0.008*"em" + 0.007*"ass" + 0.005*"yo" + 0.005*"money" + 0.005*"hook"')]"""
+
+"""500 000 con 5 argomenti da portatile
+[(0,
+  '0.007*"people" + 0.005*"new" + 0.004*"one" + 0.003*"music" + 0.003*"big" + '
+  '0.003*"think" + 0.003*"1" + 0.003*"2" + 0.003*"right" + 0.003*"going"'),
+ (1,
+  '0.005*"one" + 0.005*"shall" + 0.005*"may" + 0.004*"would" + 0.004*"upon" + '
+  '0.004*"god" + 0.003*"must" + 0.003*"us" + 0.003*"power" + 0.003*"men"'),
+ (2,
+  '0.030*"love" + 0.023*"oh" + 0.018*"chorus" + 0.015*"baby" + 0.013*"yeah" + '
+  '0.013*"let" + 0.013*"go" + 0.012*"got" + 0.012*"want" + 0.011*"time"'),
+ (3,
+  '0.021*"got" + 0.012*"shit" + 0.011*"fuck" + 0.010*"nigga" + 0.008*"em" + '
+  '0.008*"bitch" + 0.008*"man" + 0.007*"niggas" + 0.007*"cause" + '
+  '0.007*"money"'),
+ (4,
+  '0.009*"one" + 0.007*"life" + 0.007*"never" + 0.007*"see" + 0.007*"said" + '
+  '0.006*"time" + 0.005*"could" + 0.005*"would" + 0.005*"away" + 0.005*"day"')]"""
