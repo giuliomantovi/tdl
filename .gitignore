@@ -1,8 +1,8 @@
-pretrained_models/
+audio_processing/pretrained_models/
 .idea/
 Config/output_audio
 Config/input
-whisper_models
+audio_processing/whisper_models
 GTZAN
 WASABI_DB
 Genius_song_lyrics
