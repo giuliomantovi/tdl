@@ -69,7 +69,7 @@ def createCNNimagemodel(image_folder):
                               validation_data=(x_val, y_val),
                               batch_size=16,  # 32
                               verbose=2)
-    image_model.save("GTZAN_DB/GTZAN_IMAGE_CNN.h5")
+    image_model.save("audio_classification/GTZAN_DB/GTZAN_IMAGE_CNN.h5")
     # test
     y_pred = image_model.predict(x_test)
     y_pred = np.argmax(y_pred, axis=1)
@@ -85,10 +85,11 @@ def create_mel_spectrogram(audio_path, filename):
                                        n_mels=128, n_fft=4096, fmax=18000, norm='slaney')
     s_db_mel = librosa.amplitude_to_db(s, ref=np.max)
     print(s_db_mel.shape)
-    # fig, ax = plt.subplots(figsize=(4.32, 2.88))
-    fig, ax = plt.subplots(figsize=(2, 2))
+    effnet_figsize=(2, 2)
+    CNN_figsize=(4.32, 2.88)
+    fig, ax = plt.subplots(figsize=effnet_figsize)
     img = librosa.display.specshow(s_db_mel, ax=ax)
-    plt.savefig(fname=Constants.INPUT_IMAGES + "/" + filename + ".png", format='png')
+    plt.savefig(fname=Constants.INPUT_IMAGES_EFFNET + "/" + filename + ".png", format='png')
     # plt.show()
 
 

@@ -8,7 +8,7 @@ def fast_transcript(dir_path):
     model_size = "medium"
     # Run on GPU with FP16
     model = WhisperModel(model_size, device="cuda", compute_type="float16",
-                         download_root="whisper_models/")
+                         download_root="audio_processing/whisper_models/")
 
     # or run on GPU with INT8
     # model = WhisperModel(model_size, device="cuda", compute_type="int8_float16")
@@ -28,7 +28,7 @@ def fast_transcript(dir_path):
 
 def simple_transcript(file_path):
     # WHISPER AI WITHOUT CUDA
-    model = whisper.load_model("medium", download_root="whisper_models", in_memory=True)
+    model = whisper.load_model("medium", download_root="audio_prcessing/whisper_models", in_memory=True)
 
     result = model.transcribe(file_path)
     with (open(Constants.OUTPUT_AUDIO + "transcription.txt", "w") as f):

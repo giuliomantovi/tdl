@@ -65,19 +65,21 @@ def print_topics():
     pprint(lda_model.print_topics())
 
 
-def predict_text(song_text):
-    lda_model = gensim.models.ldamodel.LdaModel.load("Genius_song_lyrics_DB/lda_model/lda_mod")
-    song_text = """It's late in the evening
-She's wondering what clothes to wear
-She puts on her makeup
-And brushes her long blonde hair
-And then she asks me
-"Do I look all right?"
-And I say, "Yes, you look wonderful tonight"
-"""
+def predict_text(file):
+    lda_model = gensim.models.ldamodel.LdaModel.load("lyrics_classification/Genius_song_lyrics_DB/lda_model/lda_mod")
+    """song_text = It's late in the evening
+    She's wondering what clothes to wear
+    She puts on her makeup
+    And brushes her long blonde hair
+    And then she asks me
+    "Do I look all right?"
+    And I say, "Yes, you look wonderful tonight"
+    """
+    with open(file) as f:
+        song_text = f.read()
     data_words = [preprocess_text(song_text)]
     print(data_words)
-    id2word = corpora.Dictionary.load("Genius_song_lyrics_DB/lda_model/lda_mod.id2word")
+    id2word = corpora.Dictionary.load("lyrics_classification/Genius_song_lyrics_DB/lda_model/lda_mod.id2word")
     corpus = [id2word.doc2bow(text) for text in data_words]
     print('\n', lda_model[corpus][0])
 

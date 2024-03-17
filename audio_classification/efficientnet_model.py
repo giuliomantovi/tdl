@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
 from Config import Constants
-import mfcc_models as mod
+from mfcc_models import plot_hist
 
 genre_dict = {0: "Blues", 1: "Classical", 2: "Country", 3: "Disco", 4: "HipHop", 5: "Jazz",
               6: "Metal", 7: "Pop", 8: "Reggae", 9: "Rock"}
@@ -96,9 +96,9 @@ def create_pretrained_efficientnet_model(image_folder):
                      epochs=epochs,  # 100
                      validation_data=(x_val, y_val),
                      batch_size=64)
-    mod.plot_hist(hist)
+    plot_hist(hist)
 
-    model.save("GTZAN_DB/models/GTZAN_EFFICIENTNETB0.h5")
+    model.save("audio_classification/GTZAN_DB/models/GTZAN_EFFICIENTNETB0.h5")
     y_pred = model.predict(x_img)
     y_pred = np.argmax(y_pred, axis=1)
     print(y_pred)

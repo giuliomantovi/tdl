@@ -7,4 +7,4 @@ def source_separation(dir_path):
     for root, subdirs, files in os.walk(dir_path):
         for filename in files:
             if filename.endswith(".wav"):
-                separator.separate_to_file(os.path.join(root, filename), Constants.INPUT_TEXT)
+                separator.separate_to_file(os.path.join(root, filename), Constants.INPUT_AUDIO)
