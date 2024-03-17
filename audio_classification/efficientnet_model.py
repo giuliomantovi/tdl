@@ -98,7 +98,7 @@ def create_pretrained_efficientnet_model(image_folder):
                      batch_size=64)
     mod.plot_hist(hist)
 
-    model.save("GTZAN/models/GTZAN_EFFICIENTNETB0.h5")
+    model.save("GTZAN_DB/models/GTZAN_EFFICIENTNETB0.h5")
     y_pred = model.predict(x_img)
     y_pred = np.argmax(y_pred, axis=1)
     print(y_pred)
@@ -179,7 +179,7 @@ def find3largest(array, arr_size=Constants.NUM_CLASSES):
                      validation_data=(x_val, y_val))
     plot_hist(hist)
 
-    model.save("GTZAN/GTZAN_SCRATCH_EFFICIENTNETB0.h5")
+    model.save("GTZAN_DB/GTZAN_SCRATCH_EFFICIENTNETB0.h5")
     y_pred = model.predict(x_img)
     y_pred = np.argmax(y_pred, axis=1)
     print(y_pred)"""

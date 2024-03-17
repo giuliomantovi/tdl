@@ -21,7 +21,7 @@ def create_model_chunks():
     cont = 0
     data_words = []
     song_index = 0
-    for chunk in pd.read_csv('../Genius_song_lyrics/song_lyrics.csv',
+    for chunk in pd.read_csv('../Genius_song_lyrics_DB/song_lyrics.csv',
                              engine='c', chunksize=100000, usecols=['lyrics', 'language']):
         if cont == 5:
             break
@@ -55,18 +55,18 @@ def create_model_chunks():
                                                 num_topics=num_topics)
     # Print the Keyword in the 10 topics
     pprint(lda_model.print_topics())
-    lda_model.save(fname="Genius_song_lyrics/lda_model/lda_mod")
+    lda_model.save(fname="Genius_song_lyrics_DB/lda_model/lda_mod")
 
     # visualize_topics(lda_model, num_topics, corpus, id2word)
 
 
 def print_topics():
-    lda_model = gensim.models.ldamodel.LdaModel.load("Genius_song_lyrics/lda_model/lda_mod")
+    lda_model = gensim.models.ldamodel.LdaModel.load("Genius_song_lyrics_DB/lda_model/lda_mod")
     pprint(lda_model.print_topics())
 
 
 def predict_text(song_text):
-    lda_model = gensim.models.ldamodel.LdaModel.load("Genius_song_lyrics/lda_model/lda_mod")
+    lda_model = gensim.models.ldamodel.LdaModel.load("Genius_song_lyrics_DB/lda_model/lda_mod")
     song_text = """It's late in the evening
 She's wondering what clothes to wear
 She puts on her makeup
@@ -77,7 +77,7 @@ And I say, "Yes, you look wonderful tonight"
 """
     data_words = [preprocess_text(song_text)]
     print(data_words)
-    id2word = corpora.Dictionary.load("Genius_song_lyrics/lda_model/lda_mod.id2word")
+    id2word = corpora.Dictionary.load("Genius_song_lyrics_DB/lda_model/lda_mod.id2word")
     corpus = [id2word.doc2bow(text) for text in data_words]
     print('\n', lda_model[corpus][0])
 
@@ -90,7 +90,7 @@ def create_wordcloud(songs):
     # Generate a word cloud
     wordcloud.generate(long_string)
     # Visualize the word cloud
-    wordcloud.to_image().save("Genius_song_lyrics/lda_model/wordcloud.png")
+    wordcloud.to_image().save("Genius_song_lyrics_DB/lda_model/wordcloud.png")
 
 
 def visualize_topics(lda_model, num_topics, corpus, id2word):
@@ -127,7 +127,7 @@ def visualize_topics(lda_model, num_topics, corpus, id2word):
   '0.005*"back"')]"""
 
 """def create_model():
-    songs = pd.read_csv('../Genius_song_lyrics/song_lyrics.csv', nrows=20)
+    songs = pd.read_csv('../Genius_song_lyrics_DB/song_lyrics.csv', nrows=20)
 
     # Remove punctuation
     songs['lyrics_processed'] = \
@@ -171,7 +171,7 @@ def visualize_topics(lda_model, num_topics, corpus, id2word):
                                                 num_topics=num_topics)
     # Print the Keyword in the 10 topics
     # pprint(lda_model.print_topics())
-    # lda_model.save(fname="Genius_song_lyrics/lda_model/lda_mod")
+    # lda_model.save(fname="Genius_song_lyrics_DB/lda_model/lda_mod")
 
     # visualize_topics(lda_model, num_topics, corpus, id2word)
 """

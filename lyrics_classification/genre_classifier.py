@@ -18,7 +18,7 @@ def create_text_classifier():
     x_preprocessed = []
     y_preprocessed = []
     y = any
-    for chunk in pd.read_csv('../Genius_song_lyrics/song_lyrics.csv',
+    for chunk in pd.read_csv('../Genius_song_lyrics_DB/song_lyrics.csv',
                              engine='c', chunksize=100000, usecols=['lyrics', 'tag']):
         if cont == 20:
             break
@@ -35,25 +35,25 @@ def create_text_classifier():
     classifier.fit(x_transformed, y_preprocessed)
 
     # save the model to disk (current one trained on first 2 million songs, 0.46% accuracy)
-    classifier_filename = '../Genius_song_lyrics/genre_classifier.sav'
+    classifier_filename = '../Genius_song_lyrics_DB/genre_classifier.sav'
     pickle.dump(classifier, open(classifier_filename, 'wb'))
 
-    vectorizer_filename = '../Genius_song_lyrics/vectorizer.pk'
+    vectorizer_filename = '../Genius_song_lyrics_DB/vectorizer.pk'
     pickle.dump(vectorizer, open(vectorizer_filename, 'wb'))
     # evaluate_text_classifier()
 
 
 def evaluate_text_classifier():
     # testing classifier accuracy with the 21th chunk of genius lyrics (which has not been used to train the classifier)
-    loaded_classifier = pickle.load(open("../Genius_song_lyrics/genre_classifier.sav", 'rb'))
-    loaded_vectorizer = pickle.load(open("../Genius_song_lyrics/vectorizer.pk", 'rb'))
+    loaded_classifier = pickle.load(open("../Genius_song_lyrics_DB/genre_classifier.sav", 'rb'))
+    loaded_vectorizer = pickle.load(open("../Genius_song_lyrics_DB/vectorizer.pk", 'rb'))
 
     cont = 0
     x_preprocessed = []
     y_preprocessed = []
     y = any
 
-    for chunk in pd.read_csv('../Genius_song_lyrics/song_lyrics.csv', engine='c', chunksize=100000):
+    for chunk in pd.read_csv('../Genius_song_lyrics_DB/song_lyrics.csv', engine='c', chunksize=100000):
         if cont == 20:
             # print(chunk)
             x, y = chunk.lyrics, chunk.tag
@@ -70,8 +70,8 @@ def evaluate_text_classifier():
 
 def predict_genre_from_lyrics():
     # load the model from disk
-    loaded_classifier = pickle.load(open("../Genius_song_lyrics/genre_classifier.sav", 'rb'))
-    loaded_vectorizer = pickle.load(open("../Genius_song_lyrics/vectorizer.pk", 'rb'))
+    loaded_classifier = pickle.load(open("../Genius_song_lyrics_DB/genre_classifier.sav", 'rb'))
+    loaded_vectorizer = pickle.load(open("../Genius_song_lyrics_DB/vectorizer.pk", 'rb'))
 
     X_test = """Buddy, you're a boy, make a big noise
             Playing in the street, gonna be a big man someday

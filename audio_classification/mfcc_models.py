@@ -60,7 +60,7 @@ def createLSMTmodel(mfcc_data):
                   metrics=['accuracy'])
     model.summary()
     model.fit(x_train, y_train, validation_data=(x_val, y_val), batch_size=32, epochs=60, verbose=2)
-    model.save("GTZAN/GTZAN_LSTM_2.h5")
+    model.save("GTZAN_DB/GTZAN_LSTM_2.h5")
     # testing accuracy
     y_pred = model.predict(x_test)
     y_pred = np.argmax(y_pred, axis=1)
@@ -99,7 +99,7 @@ def createCNNmodel(mfcc_data):
     cnn_model.summary()
 
     history = cnn_model.fit(x_train, y_train, validation_data=(x_val, y_val), batch_size=32, epochs=50, verbose=2)
-    cnn_model.save("GTZAN/GTZAN_CNN.h5")
+    cnn_model.save("GTZAN_DB/GTZAN_CNN.h5")
     # testing accuracy
     y_pred = cnn_model.predict(x_test)
     y_pred = np.argmax(y_pred, axis=1)

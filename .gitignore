@@ -3,6 +3,6 @@ audio_processing/pretrained_models/
 Config/output_audio
 Config/input
 audio_processing/whisper_models
-GTZAN
+GTZAN_DB
 WASABI_DB
-Genius_song_lyrics
+Genius_song_lyrics_DB
