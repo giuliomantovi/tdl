@@ -17,34 +17,36 @@ def preprocess_text(text):
     return filtered_tokens
 
 
-def create_model_chunks():
+def remove_invalid_lyrics(chunk, song_index):
+    language = chunk['language']
+    indexes = []
+    # removing all song texts that aren't in english
+    for i in range(song_index, song_index + len(chunk)):
+        if language[i] != 'en':
+            indexes.append(i - song_index)
+    song_index += len(chunk)
+    chunk = chunk.drop(index=chunk.index[indexes])
+    return chunk
+
+
+def create_model():
     cont = 0
     data_words = []
     song_index = 0
-    for chunk in pd.read_csv('../Genius_song_lyrics_DB/song_lyrics.csv',
+    for chunk in pd.read_csv(filepath_or_buffer=Constants.GENIUS_DATASET_PATH,
                              engine='c', chunksize=100000, usecols=['lyrics', 'language']):
         if cont == 5:
             break
         print(chunk)
         cont += 1
-        language = chunk['language']
-        indexes = []
-        # removing all song texts that aren't english
-        for i in range(song_index, song_index + len(chunk)):
-            if language[i] != 'en':
-                indexes.append(i - song_index)
-        song_index += len(chunk)
-        chunk = chunk.drop(index=chunk.index[indexes])
+        chunk = remove_invalid_lyrics(chunk,song_index)
         lyrics = chunk['lyrics']
-
         data_words += [preprocess_text(text) for text in lyrics]
-
     # create_wordcloud(songs)
     # Create Dictionary
     id2word = corpora.Dictionary(data_words)
     id2word.filter_extremes()
     # Create Corpus
-    #texts = data_words
     # Term Document Frequency
     corpus = [id2word.doc2bow(text) for text in data_words]
 
@@ -53,35 +55,33 @@ def create_model_chunks():
     lda_model = gensim.models.ldamodel.LdaModel(corpus=corpus,
                                                 id2word=id2word,
                                                 num_topics=num_topics)
-    # Print the Keyword in the 10 topics
+    # Print the Keyword in the 4 topics
     pprint(lda_model.print_topics())
-    lda_model.save(fname="Genius_song_lyrics_DB/lda_model/lda_mod")
+    #SAVE THE MODEL
+    #lda_model.save(fname=Constants.SCRATCH_LDA_MODEL)
 
     # visualize_topics(lda_model, num_topics, corpus, id2word)
 
 
-def print_topics():
-    lda_model = gensim.models.ldamodel.LdaModel.load("Genius_song_lyrics_DB/lda_model/lda_mod")
+def print_model_topics():
+    lda_model = gensim.models.ldamodel.LdaModel.load(Constants.SCRATCH_LDA_MODEL)
     pprint(lda_model.print_topics())
 
 
-def predict_text(file):
-    lda_model = gensim.models.ldamodel.LdaModel.load("lyrics_classification/Genius_song_lyrics_DB/lda_model/lda_mod")
-    """song_text = It's late in the evening
-    She's wondering what clothes to wear
-    She puts on her makeup
-    And brushes her long blonde hair
-    And then she asks me
-    "Do I look all right?"
-    And I say, "Yes, you look wonderful tonight"
-    """
-    with open(file) as f:
-        song_text = f.read()
-    data_words = [preprocess_text(song_text)]
-    print(data_words)
-    id2word = corpora.Dictionary.load("lyrics_classification/Genius_song_lyrics_DB/lda_model/lda_mod.id2word")
-    corpus = [id2word.doc2bow(text) for text in data_words]
-    print('\n', lda_model[corpus][0])
+def compute_topic_distribution(file):
+    try:
+        lda_model = gensim.models.ldamodel.LdaModel.load(Constants.SCRATCH_LDA_MODEL)
+        id2word = corpora.Dictionary.load(Constants.SCRATCH_LDA_DICTIONARY)
+
+        with open(file) as f:
+            song_text = f.read()
+
+        data_words = [preprocess_text(song_text)]
+        print(data_words)
+        corpus = [id2word.doc2bow(text) for text in data_words]
+        print('\n', lda_model[corpus][0])
+    except:
+        print("Error in calculating the 4 topics distribution")
 
 
 def create_wordcloud(songs):
@@ -129,6 +129,7 @@ def visualize_topics(lda_model, num_topics, corpus, id2word):
   '0.005*"back"')]"""
 
 """def create_model():
+    #model for small dataset, without using chunks
     songs = pd.read_csv('../Genius_song_lyrics_DB/song_lyrics.csv', nrows=20)
 
     # Remove punctuation

@@ -23,7 +23,17 @@ GTZAN_AUDIO_PATH = "audio_classification/GTZAN_DB/Data/genres_original"
 
 GTZAN_IMAGE_PATH = "audio_classification/GTZAN_DB/Data/images_original"
 
+GENIUS_DATASET_PATH = "lyrics_classification/Genius_song_lyrics_DB/song_lyrics.csv"
+
 # model paths
+
+WHISPER_MODELS = "audio_processing/whisper_models"
+
+SCRATCH_LDA_MODEL = "lyrics_classification/Genius_song_lyrics_DB/lda_model/lda_mod"
+SCRATCH_LDA_DICTIONARY = "lyrics_classification/Genius_song_lyrics_DB/lda_model/lda_mod.id2word"
+
+WASABI_LDA_MODEL = "lyrics_classification/WASABI_DB/topics/lda_model_16.jl"
+WASABI_LDA_DICTIONARY = "lyrics_classification/WASABI_DB/topics/dictionary.pickle"
 
 LSMT_PATH = "audio_classification/GTZAN_DB/models/GTZAN_LSTM.h5"
 

@@ -4,26 +4,30 @@ import whisper
 
 
 def fast_transcript(dir_path):
-    #given a directory, transcripts all vocals.wav files in vocals.txt
-    model_size = "medium"
-    # Run on GPU with FP16
-    model = WhisperModel(model_size, device="cuda", compute_type="float16",
-                         download_root="audio_processing/whisper_models/")
-
-    # or run on GPU with INT8
-    # model = WhisperModel(model_size, device="cuda", compute_type="int8_float16")
-    # or run on CPU with INT8
-    # model = WhisperModel(model_size, device="cpu", compute_type="int8")
-    for root, subdirs, files in os.walk(dir_path):
-        for filename in files:
-            if filename == "vocals.wav":
-                segments, info = model.transcribe(os.path.join(root, filename), beam_size=5)
-                print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
-                with (open(os.path.join(root, filename[:-4]) + ".txt", "w") as f):
-                    for segment in segments:
-                        print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
-                        # f.write("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
-                        f.write(" %s" % segment.text)
+    # given a directory, creates transcriptions (vocals.txt) for all vocals.wav files in dir_path.
+    try:
+        model_size = "medium"
+        # Run on GPU with FP16
+        model = WhisperModel(model_size, device="cuda", compute_type="float16",
+                             download_root=Constants.WHISPER_MODELS)
+        # or run on GPU with INT8
+        # model = WhisperModel(model_size, device="cuda", compute_type="int8_float16")
+        # or run on CPU with FP16
+        # model = WhisperModel(model_size, device="cpu", compute_type="float16")
+        # or run on CPU with INT8
+        # model = WhisperModel(model_size, device="cpu", compute_type="int8")
+        for root, subdirs, files in os.walk(dir_path):
+            for filename in files:
+                if filename == "vocals.wav":
+                    segments, info = model.transcribe(str(os.path.join(root, filename)), beam_size=5)
+                    print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
+                    with (open(os.path.join(root, filename[:-4]) + ".txt", "w") as f):
+                        for segment in segments:
+                            print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
+                            # f.write("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
+                            f.write(" %s" % segment.text)
+    except:
+        print("Transcription error, try again")
 
 
 def simple_transcript(file_path):

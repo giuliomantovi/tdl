@@ -4,41 +4,17 @@ from gensim.models.phrases import Phraser, Phrases
 from lyrics_classification.text_processing import *
 
 
-def evaluate_text(file):
-    ### Compute topic distribution for unseen texts using WASABI LDA_MODEL AND DICTIONARY###
-    topic_model = joblib.load("lyrics_classification/WASABI_DB/topics/lda_model_16.jl")
-    dictionary = pd.read_pickle("lyrics_classification/WASABI_DB/topics/dictionary.pickle")
-    """song_text = When the rain is blowing in your face
-        And the whole world is on your case
-        I could offer you a warm embrace
-        To make you feel my love
-        When the evening shadows and the stars appear
-        And there is no one there to dry your tears
-        I could hold you for a million years
-        To make you feel my love
-        I know you havent made your mind up yet
-        But I will never do you wrong
-        Ive known it from the moment that we met
-        No doubt in my mind where you belong
-        Id go hungry, Id go black and blue
-        Id go crawling down the avenue
-        No, theres nothing that I wouldnt do
-        To make you feel my love
-        The storms are raging on the rolling sea
-        And on the highway of regret
-        The winds of change are blowing wild and free
-        You aint seen nothing like me yet
-        I could make you happy, make your dreams come true
-        Nothing that I wouldnt do
-        Go to the ends of the Earth for you
-        To make you feel my love
-        To make you feel my love"""
+def compute_topic_distribution(file):
+    # Compute topic distribution for unseen texts using WASABI LDA_MODEL AND DICTIONARY###
+    topic_model = joblib.load(Constants.WASABI_LDA_MODEL)
+    dictionary = pd.read_pickle(Constants.WASABI_LDA_DICTIONARY)
+
     with open(file) as f:
         song_text = f.read()
     corpus = [song_text]
     corpus = complex_preprocess(corpus)
     # dictionary = Dictionary(corpus)
-    # dictionary.filter_extremes()   ### using this will filter out all words if your corpus is very small like here
+    # dictionary.filter_extremes()   ### using this will filter out all words if your corpus is very small
     corpus_bow = [dictionary.doc2bow(text) for text in corpus]
     print(corpus_bow)
     for text in corpus_bow:
