@@ -1,5 +1,6 @@
 import os
 import pydub as pyd
+from posixpath import join
 
 
 def convert_to_wav(dir_path):
@@ -8,11 +9,11 @@ def convert_to_wav(dir_path):
         for filename in files:
             if filename[-4:] == ".wav":
                 continue
-            old_filename = os.path.join(root, filename)
+            old_filename = join(root, filename)
             if not os.path.isdir(filename):
                 try:
                     audio = pyd.AudioSegment.from_file(old_filename)
-                    new_filename = os.path.join(root, filename.split(".")[0] + ".wav")
+                    new_filename = join(root, filename.split(".")[0] + ".wav")
                     #print(new_filename)
                     audio.export(new_filename, format="wav")
                     os.remove(old_filename)
