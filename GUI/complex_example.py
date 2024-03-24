@@ -5,6 +5,8 @@ import customtkinter
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
+#IDEA: FARE TABS CON AUDIO_CLASSIFICATION E LYRICS_CLASSIFICATION (SU UNA CANZONE), POI SONG SIMILARITY TRA DUE USANDO TUTTO
+# OGNUNA CON I RADIOBUTTON PER SCEGLIERE I MODELLI E UNA INPUT DIALOG PER VEDERE DETTAGLI SUI MODELLI
 
 class App(customtkinter.CTk):
     def __init__(self):

@@ -27,7 +27,7 @@ GENIUS_DATASET_PATH = "lyrics_classification/Genius_song_lyrics_DB/song_lyrics.c
 
 # model paths
 
-WHISPER_MODELS = "audio_processing/whisper_models"
+WHISPER_MODELS = "../audio_processing/whisper_models"
 
 SCRATCH_LDA_MODEL = "lyrics_classification/Genius_song_lyrics_DB/lda_model/lda_mod"
 SCRATCH_LDA_DICTIONARY = "lyrics_classification/Genius_song_lyrics_DB/lda_model/lda_mod.id2word"

@@ -3,12 +3,12 @@ import wave
 import keyboard
 import time
 from Config import Constants
-
+import os
+from posixpath import join
 
 class Recorder:
-
     def __init__(self, audio=pyaudio.PyAudio(), device_index=1, chunk=1024, audio_format=pyaudio.paInt16,
-                 channels=1, rate=44100, wave_output_filename=Constants.INPUT_AUDIO + "mic_input.wav"):
+                 channels=1, rate=44100, wave_output_filename=os.path.abspath(join(os.getcwd(), '..', Constants.INPUT_AUDIO, "mic_input.wav"))):
         # RECORD_SECONDS = 5
         self.audio = audio
         self.chunk = chunk
@@ -17,6 +17,9 @@ class Recorder:
         self.format = audio_format
         self.device_index = device_index
         self.wave_output_filename = wave_output_filename
+        self.stream = None
+        self.frames = []
+        self.flag = 1
 
     def setMicrophone(self):
         print("----------------------record device list---------------------")
@@ -29,13 +32,48 @@ class Recorder:
         print("-------------------------------------------------------------")
         self.device_index = int(input())
 
-    def record(self):
-        stream = self.audio.open(format=self.format,
-                                 channels=self.channels,
-                                 rate=self.rate,
-                                 input=True,
-                                 input_device_index=self.device_index,
-                                 frames_per_buffer=self.chunk)
+    def set_flag(self, number):
+        self.flag = number
+
+    def start_record(self):
+        self.frames = []
+        self.flag = 1
+        self.stream = self.audio.open(format=self.format,
+                                      channels=self.channels,
+                                      rate=self.rate,
+                                      input=True,
+                                      input_device_index=self.device_index,
+                                      frames_per_buffer=self.chunk)
+        while self.flag == 1:
+            data = self.stream.read(self.chunk)
+            self.frames.append(data)
+            #print("* recording")
+
+        self.stream.close()
+
+        self.stream.stop_stream()
+        self.stream.close()
+        self.audio.terminate()
+
+        wf = wave.open(self.wave_output_filename, 'wb')
+        wf.setnchannels(self.channels)
+        wf.setsampwidth(self.audio.get_sample_size(self.format))
+        wf.setframerate(self.rate)
+        wf.writeframes(b''.join(self.frames))
+        wf.close()
+        print("Written {} successfully".format(self.wave_output_filename))
+
+    def stop_recording(self):
+        self.flag = 0
+
+    #recording function with keyboard interruption
+    """def record(self):
+        self.stream = self.audio.open(format=self.format,
+                                      channels=self.channels,
+                                      rate=self.rate,
+                                      input=True,
+                                      input_device_index=self.device_index,
+                                      frames_per_buffer=self.chunk)
 
         frames = []
         print("Press space to start recording")
@@ -46,7 +84,7 @@ class Recorder:
         # version with keyboard input
         while True:
             try:
-                data = stream.read(self.chunk)
+                data = self.stream.read(self.chunk)
                 frames.append(data)
             except KeyboardInterrupt:
                 break
@@ -56,14 +94,14 @@ class Recorder:
                 break
 
         # version with preset seconds
-        """for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
-            data = stream.read(CHUNK)
-            frames.append(data)
+        #for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
+        #    data = stream.read(CHUNK)
+        #    frames.append(data)
         
-        print("* done recording")"""
+        print("* done recording")
 
-        stream.stop_stream()
-        stream.close()
+        self.stream.stop_stream()
+        self.stream.close()
         self.audio.terminate()
 
         wf = wave.open(self.wave_output_filename, 'wb')
@@ -71,7 +109,4 @@ class Recorder:
         wf.setsampwidth(self.audio.get_sample_size(self.format))
         wf.setframerate(self.rate)
         wf.writeframes(b''.join(frames))
-        wf.close()
-
-
-
+        wf.close()"""

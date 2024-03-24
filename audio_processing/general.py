@@ -7,7 +7,7 @@ def convert_to_wav(dir_path):
     """Takes a folder of audio file of non .wav format and converts to .wav"""
     for root, subdirs, files in os.walk(dir_path):
         for filename in files:
-            if filename[-4:] == ".wav":
+            if filename[-4:] == ".wav" or filename[-4:] == ".txt":
                 continue
             old_filename = join(root, filename)
             if not os.path.isdir(filename):
