@@ -1,8 +1,6 @@
 audio_processing/pretrained_models/
 .idea/
-Config/output_audio
-Config/input
 audio_processing/whisper_models
-GTZAN_DB
-WASABI_DB
-Genius_song_lyrics_DB
+audio_classification/GTZAN_DB/Data
+lyrics_classification/WASABI_DB
+lyrics_classification/Genius_song_lyrics_DB

@@ -10,6 +10,7 @@ import math
 import shutil
 import os
 from posixpath import join
+
 from audio_processing import Recorder
 
 from Config import Constants
@@ -43,7 +44,7 @@ class App(customtkinter.CTk):
     def __init__(self):
 
         super().__init__()
-        self.geometry(f"{900}x{580}")
+        self.geometry(f"{1000}x{580}")
         self.title("Music classifier")
         # configure grid layout (2x2)
         self.grid_columnconfigure(1, weight=1)
@@ -132,49 +133,50 @@ class App(customtkinter.CTk):
         # AUDIO CLASSIFICATION TAB:
         # create radiobutton frame for ac
         self.radiobutton_frame = customtkinter.CTkFrame(self.tabview.tab("Audio classification"))
-        self.radiobutton_frame.grid(row=0, column=0, padx=(20, 20), pady=(20, 20), sticky="nsew")
+        self.radiobutton_frame.grid(row=0, column=0, padx=(20, 20), pady=(20, 5), sticky="nsew")
         """# HORIZONTAL GRID FOR RADIO BUTTONS(MODEL CHOICE) AND MODEL DESCRIPTIONS
         self.ac_models_grid = customtkinter.CTkFrame(master=self.sidebar_frame, corner_radius=0,
                                                      fg_color='transparent')
         self.ac_models_grid.grid(row=0, column=0, sticky="nsew")"""
         # inserting radiobuttons
-        self.ac_model_selected = customtkinter.StringVar(value="EfficientNet")
+        self.ac_model_selected = customtkinter.StringVar(value="LSTM")
         self.label_radio_group = customtkinter.CTkLabel(master=self.radiobutton_frame, text="MODEL SELECTION")
-        self.label_radio_group.grid(row=0, column=0, columnspan=1, padx=10, pady=10, sticky="")
-        self.radio_button_effnet = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="EfficientNet",
-                                                           variable=self.ac_model_selected, value="EfficientNet", command=self.pressed_radiobutton)
-        self.radio_button_effnet.grid(row=1, column=0, pady=10, padx=20, sticky="w")
+        self.label_radio_group.grid(row=0, column=0, columnspan=1, padx=10, pady=20, sticky="")
         self.radio_button_lsmt = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="LSTM",
                                                                 variable=self.ac_model_selected, value="LSTM",
                                                                 command=self.pressed_radiobutton)
-        self.radio_button_lsmt.grid(row=2, column=0, pady=10, padx=20, sticky="w")
-        self.radio_button_cnn = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="CNN",
+        self.radio_button_lsmt.grid(row=1, column=0, pady=(5,10), padx=20, sticky="w")
+        self.radio_button_cnn = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="CNN - mfcc",
                                                            variable=self.ac_model_selected, value="CNN", command=self.pressed_radiobutton)
-        self.radio_button_cnn.grid(row=3, column=0, pady=10, padx=20, sticky="w")
-        self.radio_button_cnnspec = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="CNN (Spectrogram)",
+        self.radio_button_cnn.grid(row=2, column=0, pady=15, padx=20, sticky="w")
+        self.radio_button_cnnspec = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="CNN - spectrogram",
                                                            variable=self.ac_model_selected, value="CNN (Spectrogram)", command=self.pressed_radiobutton)
-        self.radio_button_cnnspec.grid(row=4, column=0, pady=(10, 20), padx=20, sticky="w")
+        self.radio_button_cnnspec.grid(row=3, column=0, pady=15, padx=20, sticky="w")
+        self.radio_button_effnet = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="EfficientNet (suggested)",
+                                                           variable=self.ac_model_selected, value="EfficientNet", command=self.pressed_radiobutton)
+        self.radio_button_effnet.grid(row=4, column=0, pady=(15,0), padx=20, sticky="w")
         # Label for model description
         self.ac_model_label = customtkinter.CTkLabel(master=self.tabview.tab("Audio classification"),
-                                                     text="94% training accuracy, 70% validation accuracy")
-        self.ac_model_label.grid(row=0, column=1, padx=5, pady=(5, 5), sticky="n")
+                                                     text="99% training accuracy, 83% validation accuracy")
+        self.ac_model_label.grid(row=0, column=1, padx=0, pady=(320, 5), sticky="n")
         # Images for models description
+        self.ac_images_size = (500, 300)
         self.ac_lsmt_image = customtkinter.CTkImage(dark_image=Image.open(
-            "images/ac_models/LSTM.png"), size=(400, 240))
+            "images/ac_models/LSTM.png"), size=self.ac_images_size)
         self.ac_cnn_image = customtkinter.CTkImage(dark_image=Image.open(
-            "images/ac_models/CNN.png"), size=(400, 240))
+            "images/ac_models/CNN.png"), size=self.ac_images_size)
         self.ac_cnnImage_image = customtkinter.CTkImage(dark_image=Image.open(
-            "images/ac_models/CNN_IMAGE.png"), size=(400, 240))
+            "images/ac_models/CNN_IMAGE.png"), size=self.ac_images_size)
         self.ac_effNet_image = customtkinter.CTkImage(dark_image=Image.open(
-            "images/ac_models/pretr_efficientnet_64bs.png"), size=(400, 240))
+            "images/ac_models/pretr_efficientnet_64bs.png"), size=self.ac_images_size)
         #displaying initial model image
         self.ac_model_image = customtkinter.CTkLabel(master=self.tabview.tab("Audio classification"),
-                                                     image=self.ac_effNet_image)
-        self.ac_model_image.grid(row=0, column=1, padx=(15, 5), pady=(35, 5), sticky="n")
+                                                     image=self.ac_lsmt_image)
+        self.ac_model_image.grid(row=0, column=1, padx=(0, 5), pady=(20, 5), sticky="n")
         #SONG CHOICE LABEL AND COMBOBOX 2
         self.ac_songs_label = customtkinter.CTkLabel(master=self.tabview.tab("Audio classification"),
                                                      text="SONG SELECTION")
-        self.ac_songs_label.grid(row=1, column=0, padx=(5, 5), pady=(35, 5))
+        self.ac_songs_label.grid(row=1, column=0, padx=(5, 5), pady=(25, 5))
         self.ac_songs_combobox = customtkinter.CTkComboBox(master=self.tabview.tab("Audio classification"),
                                                            state="readonly", values=self.audios_names_list)
         self.ac_songs_combobox.grid(row=2, column=0, padx=10, pady=0)
@@ -218,23 +220,41 @@ class App(customtkinter.CTk):
         # print(audios_paths_list)
 
     def pressed_radiobutton(self):
-        print(self.ac_model_selected.get())
         match self.ac_model_selected.get():
             case "EfficientNet":
-                self.ac_model_label.configure(text="94% training accuracy, 70% validation accuracy")
+                self.ac_model_label.configure(text="93% training accuracy, 74% validation accuracy")
                 self.ac_model_image.configure(image=self.ac_effNet_image)
             case "CNN":
-                self.ac_model_label.configure(text="Mfcc based")
+                self.ac_model_label.configure(text="97% training accuracy, 90% validation accuracy")
                 self.ac_model_image.configure(image=self.ac_cnn_image)
             case "CNN (Spectrogram)":
-                self.ac_model_label.configure(text="Spectrogram based based")
+                self.ac_model_label.configure(text="100% training accuracy, 65% validation accuracy")
                 self.ac_model_image.configure(image=self.ac_cnnImage_image)
             case "LSTM":
-                self.ac_model_label.configure(text="Mfcc based")
+                self.ac_model_label.configure(text="99% training accuracy, 83% validation accuracy")
                 self.ac_model_image.configure(image=self.ac_lsmt_image)
 
     def predict_genre(self):
-        print("c")
+        from audio_classification.mfcc_models import preprocess_dataset, testaudiomodel
+        model = self.ac_model_selected.get()
+        print(model)
+        match model:
+            case "EfficientNet":
+                print("effnet")
+            case "CNN" | "LSTM":
+                print("CNN/LSMT")
+                data = preprocess_dataset(Constants.INPUT_AUDIO)
+                if model == "CNN":
+                    result = testaudiomodel(data, os.path.abspath(join(os.getcwd(), '..', Constants.CNN_PATH)))
+                else:
+                    print(os.path.abspath(join(os.getcwd(), '..', Constants.LSMT_PATH)))
+                    result = testaudiomodel(data, "C:/Users/Utente/UNI/tesina_LAUREA/audio_classification/GTZAN_DB/models/GTZAN_LSTM.h5")
+                print(result)
+            case "CNN (Spectrogram)":
+                print("CNN IMAGE")
+            case _:
+                print("Unknown error")
+
 
     def handle_recording(self):
         if self.recording == 0:

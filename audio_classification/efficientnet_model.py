@@ -8,7 +8,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
 from Config import Constants
-from mfcc_models import plot_hist
+from audio_classification import general
 
 genre_dict = {0: "Blues", 1: "Classical", 2: "Country", 3: "Disco", 4: "HipHop", 5: "Jazz",
               6: "Metal", 7: "Pop", 8: "Reggae", 9: "Rock"}
@@ -82,22 +82,23 @@ def create_pretrained_efficientnet_model(image_folder):
 
     epochs = 50  # @param {type: "slider", min:8, max:80}
     """ epochs frozen = 50, epochs unfrozen = 20 batch_size=64
-    loss: 0.1789 - accuracy: 0.9342 - val_loss: 1.2579 - val_accuracy: 0.7051"""
-    hist = model.fit(x_train, y_train,
+    loss: 0.2116 - accuracy: 0.9342 - val_loss: 1.1934 - val_accuracy: 0.7372"""
+    history = model.fit(x_train, y_train,
                      epochs=epochs,  # 100
                      validation_data=(x_val, y_val),
                      batch_size=64)
-    # plot_hist(hist)
 
     # 2 step
     unfreeze_model(model)
     epochs = 20
-    hist = model.fit(x_train, y_train,
+    history2 = model.fit(x_train, y_train,
                      epochs=epochs,  # 100
                      validation_data=(x_val, y_val),
                      batch_size=64)
-    plot_hist(hist)
-
+    #general.plot_hist(hist)
+    history.history["accuracy"] += history2.history["accuracy"]
+    history.history["val_accuracy"] += history2.history["val_accuracy"]
+    general.plot_hist(history)
     model.save("audio_classification/GTZAN_DB/models/GTZAN_EFFICIENTNETB0.h5")
     y_pred = model.predict(x_img)
     y_pred = np.argmax(y_pred, axis=1)

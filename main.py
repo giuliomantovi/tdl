@@ -1,4 +1,4 @@
-from audio_classification import spectrogram_models, mfcc_models
+from audio_classification import spectrogram_models, mfcc_models, efficientnet_model
 from audio_processing import source_separation, transcription
 from lyrics_classification.lda_models import pretrained_lda_model, scratch_lda_model
 from Config.Constants import *
@@ -32,7 +32,8 @@ if __name__ == '__main__':
     # data = mfcc_models.preprocess_dataset(GTZAN_AUDIO_PATH)
     # mfcc_models.createCNNmodel(data)
     # mfcc_models.testaudiomodel(data,LSMT_PATH)
-    spectrogram_models.createCNNimagemodel(GTZAN_IMAGE_PATH)
+    # spectrogram_models.createCNNimagemodel(GTZAN_IMAGE_PATH)
+    efficientnet_model.create_pretrained_efficientnet_model(GTZAN_IMAGE_PATH)
     # create_pretrained_efficientnet_model(Constants.GTZAN_IMAGE_PATH)
     # convert_to_wav(Constants.INPUT_AUDIO)
     # CREATING SPECTROGRAMS FROM .WAV DIR
