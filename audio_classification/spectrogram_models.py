@@ -8,6 +8,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 import librosa
 import matplotlib.pyplot as plt
+from audio_classification import general
 
 from Config import Constants
 
@@ -64,18 +65,21 @@ def createCNNimagemodel(image_folder):
     image_model.compile(optimizer=opt,
                         loss='sparse_categorical_crossentropy',
                         metrics=['accuracy'])
+    # kernsize=3, bs16, ep50 39/39, dr=0.2 - 4s - loss: 0.0023 - accuracy: 1.0000 - val_loss: 1.4433 - val_accuracy: 0.6346 - 4s/epoch - 98ms/step
+    #(IMAGE_CNN) kernsize=3, bs16, ep50 39/39, dr=ndr 39/39 - 4s - loss: 0.0021 - accuracy: 1.0000 - val_loss: 1.4967 - val_accuracy: 0.6474 - 4s/epoch - 97ms/step
+    #non cambia nulla con o senza dropout
     history = image_model.fit(x_train, y_train,
-                              epochs=50,  # 100
+                              epochs=30,  # 100
                               validation_data=(x_val, y_val),
                               batch_size=16,  # 32
                               verbose=2)
-    image_model.save("audio_classification/GTZAN_DB/GTZAN_IMAGE_CNN.h5")
+    image_model.save("audio_classification/models/GTZAN_IMAGE_CNN.h5")
     # test
     y_pred = image_model.predict(x_test)
     y_pred = np.argmax(y_pred, axis=1)
 
     print(np.sum(y_pred == y_test) / len(y_pred))
-
+    general.plot_hist(history)
 
 
 def create_mel_spectrogram(audio_path, filename):

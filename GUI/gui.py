@@ -138,28 +138,39 @@ class App(customtkinter.CTk):
                                                      fg_color='transparent')
         self.ac_models_grid.grid(row=0, column=0, sticky="nsew")"""
         # inserting radiobuttons
-        self.radio_var = tkinter.IntVar(value=0)
+        self.ac_model_selected = customtkinter.StringVar(value="EfficientNet")
         self.label_radio_group = customtkinter.CTkLabel(master=self.radiobutton_frame, text="MODEL SELECTION")
         self.label_radio_group.grid(row=0, column=0, columnspan=1, padx=10, pady=10, sticky="")
-        self.radio_button_1 = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="LSTM",
-                                                           variable=self.radio_var, value=0)
-        self.radio_button_1.grid(row=1, column=0, pady=10, padx=20, sticky="w")
-        self.radio_button_2 = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="CNN",
-                                                           variable=self.radio_var, value=1)
-        self.radio_button_2.grid(row=2, column=0, pady=10, padx=20, sticky="w")
-        self.radio_button_3 = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="EfficietNet",
-                                                           variable=self.radio_var, value=2)
-        self.radio_button_3.grid(row=3, column=0, pady=(10, 20), padx=20, sticky="w")
+        self.radio_button_effnet = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="EfficientNet",
+                                                           variable=self.ac_model_selected, value="EfficientNet", command=self.pressed_radiobutton)
+        self.radio_button_effnet.grid(row=1, column=0, pady=10, padx=20, sticky="w")
+        self.radio_button_lsmt = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="LSTM",
+                                                                variable=self.ac_model_selected, value="LSTM",
+                                                                command=self.pressed_radiobutton)
+        self.radio_button_lsmt.grid(row=2, column=0, pady=10, padx=20, sticky="w")
+        self.radio_button_cnn = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="CNN",
+                                                           variable=self.ac_model_selected, value="CNN", command=self.pressed_radiobutton)
+        self.radio_button_cnn.grid(row=3, column=0, pady=10, padx=20, sticky="w")
+        self.radio_button_cnnspec = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="CNN (Spectrogram)",
+                                                           variable=self.ac_model_selected, value="CNN (Spectrogram)", command=self.pressed_radiobutton)
+        self.radio_button_cnnspec.grid(row=4, column=0, pady=(10, 20), padx=20, sticky="w")
         # Label for model description
         self.ac_model_label = customtkinter.CTkLabel(master=self.tabview.tab("Audio classification"),
-                                                     text="LSMT MODEL, mfcc based")
+                                                     text="94% training accuracy, 70% validation accuracy")
         self.ac_model_label.grid(row=0, column=1, padx=5, pady=(5, 5), sticky="n")
-        # Image for model description
-        lsmt_image = customtkinter.CTkImage(dark_image=Image.open("images/pretr_efficientnet_64bs.png"),
-                                            size=(400, 240))
-        self.ac_model_label = customtkinter.CTkLabel(master=self.tabview.tab("Audio classification"),
-                                                     image=lsmt_image)
-        self.ac_model_label.grid(row=0, column=1, padx=(35, 5), pady=(35, 5), sticky="n")
+        # Images for models description
+        self.ac_lsmt_image = customtkinter.CTkImage(dark_image=Image.open(
+            "images/ac_models/LSTM.png"), size=(400, 240))
+        self.ac_cnn_image = customtkinter.CTkImage(dark_image=Image.open(
+            "images/ac_models/CNN.png"), size=(400, 240))
+        self.ac_cnnImage_image = customtkinter.CTkImage(dark_image=Image.open(
+            "images/ac_models/CNN_IMAGE.png"), size=(400, 240))
+        self.ac_effNet_image = customtkinter.CTkImage(dark_image=Image.open(
+            "images/ac_models/pretr_efficientnet_64bs.png"), size=(400, 240))
+        #displaying initial model image
+        self.ac_model_image = customtkinter.CTkLabel(master=self.tabview.tab("Audio classification"),
+                                                     image=self.ac_effNet_image)
+        self.ac_model_image.grid(row=0, column=1, padx=(15, 5), pady=(35, 5), sticky="n")
         #SONG CHOICE LABEL AND COMBOBOX 2
         self.ac_songs_label = customtkinter.CTkLabel(master=self.tabview.tab("Audio classification"),
                                                      text="SONG SELECTION")
@@ -205,6 +216,22 @@ class App(customtkinter.CTk):
         # if audios_paths_list:
         #    show_player()
         # print(audios_paths_list)
+
+    def pressed_radiobutton(self):
+        print(self.ac_model_selected.get())
+        match self.ac_model_selected.get():
+            case "EfficientNet":
+                self.ac_model_label.configure(text="94% training accuracy, 70% validation accuracy")
+                self.ac_model_image.configure(image=self.ac_effNet_image)
+            case "CNN":
+                self.ac_model_label.configure(text="Mfcc based")
+                self.ac_model_image.configure(image=self.ac_cnn_image)
+            case "CNN (Spectrogram)":
+                self.ac_model_label.configure(text="Spectrogram based based")
+                self.ac_model_image.configure(image=self.ac_cnnImage_image)
+            case "LSTM":
+                self.ac_model_label.configure(text="Mfcc based")
+                self.ac_model_image.configure(image=self.ac_lsmt_image)
 
     def predict_genre(self):
         print("c")
