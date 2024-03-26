@@ -73,7 +73,7 @@ def createCNNimagemodel(image_folder):
                               validation_data=(x_val, y_val),
                               batch_size=16,  # 32
                               verbose=2)
-    image_model.save("audio_classification/models/GTZAN_IMAGE_CNN.h5")
+    image_model.save("audio_classification/models/CNN_IMAGE.h5")
     # test
     y_pred = image_model.predict(x_test)
     y_pred = np.argmax(y_pred, axis=1)

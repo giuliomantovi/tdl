@@ -3,6 +3,10 @@ import numpy as np
 import os
 import librosa
 from Config import Constants
+import sys
+
+genre_dict = {0: "Blues", 1: "Classical", 2: "Country", 3: "Disco", 4: "HipHop", 5: "Jazz",
+              6: "Metal", 7: "Pop", 8: "Reggae", 9: "Rock"}
 
 
 def create_mel_spectrogram(dirpath, filename, model):
@@ -30,7 +34,6 @@ def create_mel_spectrogram(dirpath, filename, model):
         img = librosa.display.specshow(s_db_mel, ax=ax)
         plt.savefig(fname=os.path.join(dirpath, "effnet_spec", filename[:-4]) + ".png", format='png')
 
-
     # plt.show()
 
 
@@ -38,7 +41,7 @@ def audio_to_spectrograms(dir_path, model):
     for root, subdirs, files in os.walk(dir_path):
         for filename in files:
             if filename.endswith(".wav"):
-                #file_path = os.path.join(root, filename)
+                # file_path = os.path.join(root, filename)
                 create_mel_spectrogram(root, filename, model)
 
 
@@ -46,6 +49,59 @@ def most_frequent(arr):
     unique, counts = np.unique(arr, return_counts=True)
     index = np.argmax(counts)
     return unique[index]
+
+
+def three_most_frequent(arr):
+    values, counts = np.unique(arr, return_counts=True)
+    total = sum(counts)
+    different_val = min(3, len(values))
+    ind = np.argpartition(-counts, kth=different_val-1)[:different_val]
+    values = values[ind]
+    occurrences = counts[ind]
+    percentages = [x/total for x in occurrences]
+    values = [genre_dict[x] for x in values]
+    return values, percentages
+
+
+def translate_predictions(predictions, names):
+    for i in range(len(predictions)):
+        print(names[i].split(".")[0])
+        three_largest, indexes = find3largest(predictions[i])
+        tot = sum(three_largest)
+        for j in range(len(three_largest)):
+            three_largest[j] = round(three_largest[j] / tot * 100, 0)
+        for j in range(len(three_largest)):
+            if three_largest[j] != 0.:
+                print(genre_dict[indexes[j]] + ": " + str(int(three_largest[j])) + "%")
+        print()
+
+
+def find3largest(array, arr_size=Constants.NUM_CLASSES):
+    # time complexity o(n), space complexity o(1)
+    if arr_size < 3:
+        print(" Invalid Input ")
+        return
+    third = first = second = -sys.maxsize
+    third_index = second_index = first_index = -1
+
+    for i in range(0, arr_size):
+        if array[i] > first:
+            third = second
+            third_index = second_index
+            second = first
+            second_index = first_index
+            first = array[i]
+            first_index = i
+        elif array[i] > second:
+            third = second
+            third_index = second_index
+            second = array[i]
+            second_index = i
+        elif array[i] > third:
+            third = array[i]
+            third_index = i
+
+    return [first, second, third], [first_index, second_index, third_index]
 
 
 def plot_hist(hist):

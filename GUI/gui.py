@@ -10,6 +10,8 @@ import math
 import shutil
 import os
 from posixpath import join
+import matplotlib.pyplot as plt
+import numpy as np
 
 from audio_processing import Recorder
 
@@ -200,7 +202,7 @@ class App(customtkinter.CTk):
             self.ac_songs_combobox.set(self.audios_names_list[0])
         # GENRE PREDICTION BUTTON
         self.ac_predict_button = customtkinter.CTkButton(master=self.tabview.tab("Audio classification"),
-                                                         text="Predict song genre", command=self.predict_genre,
+                                                         text="Create genre predictions", command=self.predict_genre,
                                                          font=("Helvetica", 16))
         self.ac_predict_button.grid(row=3, column=0, padx=10, pady=15)
 
@@ -251,30 +253,49 @@ class App(customtkinter.CTk):
                 self.ac_model_image.configure(image=self.ac_lsmt_image)
 
     def predict_genre(self):
-        from audio_classification import mfcc_models, general
+        from audio_classification import general
         model = self.ac_model_selected.get()
-        print(model)
+        audios_dir = os.path.abspath(join(os.getcwd(), '..', Constants.INPUT_AUDIO))
+        values = percentages = []
         match model:
             case "EfficientNet":
+                from audio_classification import efficientnet_model
                 print("effnet")
-                general.audio_to_spectrograms(os.path.abspath(join(os.getcwd(), '..', Constants.INPUT_AUDIO)), "EffNet")
+                general.audio_to_spectrograms(audios_dir, "EffNet")
+                efficientnet_model.testefficientnetmodel(join(audios_dir, "effnet_spec"),
+                                                         os.path.abspath(join(os.getcwd(), '..', Constants.EFFICIENTNET_PRETRAINED_PATH)))
             case "CNN (Spectrogram)":
+                from audio_classification import spectrogram_models
                 print("CNN IMAGE")
-                general.audio_to_spectrograms(os.path.abspath(join(os.getcwd(), '..', Constants.INPUT_AUDIO)), "CNN")
+                general.audio_to_spectrograms(audios_dir, "CNN")
+                spectrogram_models.testimagemodel(join(audios_dir, "cnn_spec"),
+                                                  os.path.abspath(join(os.getcwd(), '..', Constants.CNN_IMAGE_PATH)))
             case "CNN" | "LSTM":
+                from audio_classification import mfcc_models
                 print("CNN/LSMT")
-                data = mfcc_models.preprocess_dir(os.path.abspath(join(os.getcwd(), '..', Constants.INPUT_AUDIO)))
-                print(data)
+                data = mfcc_models.preprocess_dir(audios_dir)
                 if model == "CNN":
-                    result = mfcc_models.testaudiomodel(data,
+                    values, percentages = mfcc_models.testaudiomodel(data,
                                                         os.path.abspath(join(os.getcwd(), '..', Constants.CNN_PATH)))
                 else:
-                    print(os.path.abspath(join(os.getcwd(), '..', Constants.LSMT_PATH)))
-                    result = mfcc_models.testaudiomodel(data,
+                    values, percentages = mfcc_models.testaudiomodel(data,
                                                         os.path.abspath(join(os.getcwd(), '..', Constants.LSMT_PATH)))
-                print(result)
             case _:
                 print("Unknown error, change model")
+        print(values)
+        print(percentages)
+        for i in range(len(values)):
+            plt.clf()
+            x = np.array(values[i])
+            y = np.array(percentages[i])
+            filename = self.audios_names_list[i]
+            print(filename)
+            plt.title(filename)
+            plt.ylim(0, 1)
+            plt.bar(x, y)
+            plt.savefig(fname=os.path.join(audios_dir, "genre_predictions", filename) + ".png", format='png')
+
+        #plt.show()
 
     def handle_recording(self):
         if self.recording == 0:

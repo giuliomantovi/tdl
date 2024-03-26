@@ -35,12 +35,12 @@ SCRATCH_LDA_DICTIONARY = "lyrics_classification/Genius_song_lyrics_DB/lda_model/
 WASABI_LDA_MODEL = "lyrics_classification/WASABI_DB/topics/lda_model_16.jl"
 WASABI_LDA_DICTIONARY = "lyrics_classification/WASABI_DB/topics/dictionary.pickle"
 
-LSMT_PATH = "audio_classification/GTZAN_DB/models/GTZAN_LSTM.h5"
+LSMT_PATH = "audio_classification/GTZAN_DB/models/LSTM.h5"
 
-CNN_PATH = "audio_classification/GTZAN_DB/models/GTZAN_CNN.h5"
+CNN_PATH = "audio_classification/GTZAN_DB/models/CNN.h5"
 
-CNN_IMAGE_PATH = "audio_classification/GTZAN_DB/models/GTZAN_IMAGE_CNN.h5"
+CNN_IMAGE_PATH = "audio_classification/GTZAN_DB/models/CNN_IMAGE.h5"
 
-EFFICIENTNET_PRETRAINED_PATH = "audio_classification/GTZAN_DB/models/GTZAN_EFFICIENTNETB0.h5"
+EFFICIENTNET_PRETRAINED_PATH = "audio_classification/GTZAN_DB/models/EFFICIENTNETB0.h5"
 
-EFFICIENTNET_SCRATCH_PATH = "audio_classification/GTZAN_DB/models/GTZAN_SCRATCH_EFFICIENTNETB0.h5"
+EFFICIENTNET_SCRATCH_PATH = "audio_classification/GTZAN_DB/models/EFFICIENTNETB0_SCRATCH.h5"

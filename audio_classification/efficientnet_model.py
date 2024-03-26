@@ -2,7 +2,6 @@ import os
 import numpy as np
 import tensorflow as tf
 import cv2
-import sys
 from keras import layers
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
@@ -10,8 +9,7 @@ from sklearn.preprocessing import LabelEncoder
 from Config import Constants
 from audio_classification import general
 
-genre_dict = {0: "Blues", 1: "Classical", 2: "Country", 3: "Disco", 4: "HipHop", 5: "Jazz",
-              6: "Metal", 7: "Pop", 8: "Reggae", 9: "Rock"}
+
 
 
 def load_resize_image_test(img_folder):
@@ -99,7 +97,7 @@ def create_pretrained_efficientnet_model(image_folder):
     history.history["accuracy"] += history2.history["accuracy"]
     history.history["val_accuracy"] += history2.history["val_accuracy"]
     general.plot_hist(history)
-    model.save("audio_classification/GTZAN_DB/models/GTZAN_EFFICIENTNETB0.h5")
+    model.save("audio_classification/GTZAN_DB/models/EFFICIENTNETB0.h5")
     y_pred = model.predict(x_img)
     y_pred = np.argmax(y_pred, axis=1)
     print(y_pred)
@@ -109,49 +107,10 @@ def testefficientnetmodel(images_path, model_path):
     x_img, names = load_resize_image_test(images_path)
     model = tf.keras.models.load_model(model_path)
     y_pred = model.predict(x_img)
-    translate_predictions(y_pred, names)
+    general.translate_predictions(y_pred, names)
     # y_pred = np.argmax(y_pred, axis=1)
 
 
-def translate_predictions(predictions, names):
-    for i in range(len(predictions)):
-        print(names[i].split(".")[0])
-        three_largest, indexes = find3largest(predictions[i])
-        tot = sum(three_largest)
-        for j in range(len(three_largest)):
-            three_largest[j] = round(three_largest[j] / tot * 100, 0)
-        for j in range(len(three_largest)):
-            if three_largest[j] != 0.:
-                print(genre_dict[indexes[j]] + ": " + str(int(three_largest[j])) + "%")
-        print()
-
-
-def find3largest(array, arr_size=Constants.NUM_CLASSES):
-    # time complexity o(n), space complexity o(1)
-    if arr_size < 3:
-        print(" Invalid Input ")
-        return
-    third = first = second = -sys.maxsize
-    third_index = second_index = first_index = -1
-
-    for i in range(0, arr_size):
-        if array[i] > first:
-            third = second
-            third_index = second_index
-            second = first
-            second_index = first_index
-            first = array[i]
-            first_index = i
-        elif array[i] > second:
-            third = second
-            third_index = second_index
-            second = array[i]
-            second_index = i
-        elif array[i] > third:
-            third = array[i]
-            third_index = i
-
-    return [first, second, third], [first_index, second_index, third_index]
 
 
 """def create_scratch_efficientnet_model(image_folder):
@@ -180,7 +139,7 @@ def find3largest(array, arr_size=Constants.NUM_CLASSES):
                      validation_data=(x_val, y_val))
     plot_hist(hist)
 
-    model.save("GTZAN_DB/GTZAN_SCRATCH_EFFICIENTNETB0.h5")
+    model.save("GTZAN_DB/EFFICIENTNETB0_SCRATCH.h5")
     y_pred = model.predict(x_img)
     y_pred = np.argmax(y_pred, axis=1)
     print(y_pred)"""

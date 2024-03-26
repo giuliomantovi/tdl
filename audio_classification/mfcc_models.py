@@ -169,10 +169,13 @@ def testaudiomodel(mfcc_data, model_path):
     print(mfcc_data["filenames"])
     y_pred = np.split(y_pred, numbers_per_audio[:-1])
     print(y_pred)
-    audio_genres = []
+    values = []
+    percentages = []
     for arr in y_pred:
-        audio_genres.append(general.most_frequent(arr))
-    return audio_genres
+        val, perc = general.three_most_frequent(arr)
+        values.append(val)
+        percentages.append(perc)
+    return values, percentages
 
 
 

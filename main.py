@@ -1,3 +1,4 @@
+import audio_classification.general
 from audio_classification import spectrogram_models, mfcc_models, efficientnet_model
 from audio_processing import source_separation, transcription
 from lyrics_classification.lda_models import pretrained_lda_model, scratch_lda_model
@@ -29,7 +30,8 @@ if __name__ == '__main__':
     # predict_genre_from_lyrics()
     # lda_model.create_model()
     # evaluate_text_classifier() 46%
-    data = mfcc_models.preprocess_dataset(GTZAN_AUDIO_PATH)
+    # data = mfcc_models.preprocess_dataset(GTZAN_AUDIO_PATH)
+    audio_classification.general.top3_frequencies_map([2,2,2,3,3,3,4,5,5,6,6,6,6,7])
     # mfcc_models.createCNNmodel(data)
     # mfcc_models.testaudiomodel(data,LSMT_PATH)
     # spectrogram_models.createCNNimagemodel(GTZAN_IMAGE_PATH)
