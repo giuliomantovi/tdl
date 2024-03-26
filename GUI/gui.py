@@ -44,7 +44,7 @@ class App(customtkinter.CTk):
     def __init__(self):
 
         super().__init__()
-        self.geometry(f"{1000}x{580}")
+        self.geometry(f"{1100}x{580}")
         self.title("Music classifier")
         # configure grid layout (2x2)
         self.grid_columnconfigure(1, weight=1)
@@ -55,11 +55,12 @@ class App(customtkinter.CTk):
         self.sidebar_frame = customtkinter.CTkFrame(self, width=150, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, rowspan=2, sticky="nsew")
         # MUSIC PLAYER LABEL
-        self.songs_label = customtkinter.CTkLabel(master=self.sidebar_frame, text="MUSIC PLAYER")
+        self.songs_label = customtkinter.CTkLabel(master=self.sidebar_frame, text="MUSIC PLAYER",
+                                                  font=("Helvetica", 18))
         self.songs_label.grid(row=0, column=0, padx=5, pady=(20, 0))
         # SONG CHOICE COMBOBOX
         self.songs_combobox = customtkinter.CTkComboBox(master=self.sidebar_frame, width=150, command=self.change_song,
-                                                        state="readonly")
+                                                        state="readonly", font=("Helvetica", 16))
         self.songs_combobox.grid(row=1, column=0, padx=20, pady=10)
         # HORIZONTAL GRID FOR 3 BUTTONS
         self.buttons_grid = customtkinter.CTkFrame(master=self.sidebar_frame, width=50, corner_radius=0,
@@ -89,6 +90,7 @@ class App(customtkinter.CTk):
         self.selectfile_grid.grid(row=5, column=0, sticky="nsew")
         # ADD AUDIOS SELECTION BUTTONS
         self.select_button = customtkinter.CTkButton(master=self.selectfile_grid, text="Add audios",
+                                                     font=("Helvetica", 16),
                                                      command=self.select_file, width=130)
         self.select_button.grid(row=0, column=0, padx=(30, 5), pady=20)
         self.register_button = customtkinter.CTkButton(master=self.selectfile_grid, text="", image=self.microphone,
@@ -108,21 +110,24 @@ class App(customtkinter.CTk):
         )
         self.accompaniment_button.grid(row=9, column=0, padx=20, pady=5)"""
         # TRANSCRIPTION LABEL
-        self.songs_label = customtkinter.CTkLabel(master=self.sidebar_frame, text="TRANSCRIPTION")
+        self.songs_label = customtkinter.CTkLabel(master=self.sidebar_frame, text="TRANSCRIPTION",
+                                                  font=("Helvetica", 18))
         self.songs_label.grid(row=6, column=0, padx=5, pady=(10, 0))
         # COMPUTE TRANSCRIPTIONS BUTTON
         self.select_button = customtkinter.CTkButton(master=self.sidebar_frame, text="Create transcriptions",
+                                                     font=("Helvetica", 16),
                                                      command=self.transcription_threading)
         self.select_button.grid(row=7, column=0, padx=20, pady=5)
         # TRANSCRIPTION TEXTBOX
-        self.lyrics_textbox = customtkinter.CTkTextbox(master=self.sidebar_frame, wrap='word')
+        self.lyrics_textbox = customtkinter.CTkTextbox(master=self.sidebar_frame, wrap='word', font=("Helvetica", 16))
         self.lyrics_textbox.grid(row=8, column=0, padx=20, pady=(15, 10))
         # LOADING OPERATIONS
-        self.load_audios("C:/Users/Utente/UNI/tesina_LAUREA/Config/input/user/audio")
+        self.load_audios(os.path.abspath(join(os.getcwd(), '..', Constants.INPUT_AUDIO)))
         self.update_progressbar()
 
         # CREATE TABLEVIEW FOR 2ND PART OF THE APP
         self.tabview = customtkinter.CTkTabview(self, fg_color="transparent")
+        self.tabview._segmented_button.configure(font=("Helvetica", 16))
         self.tabview.grid(row=0, column=1, rowspan=2, padx=(15, 15), pady=(5, 5), sticky="nsew")
         self.tabview.add("Audio classification")
         self.tabview.add("Lyrics classification")
@@ -140,24 +145,34 @@ class App(customtkinter.CTk):
         self.ac_models_grid.grid(row=0, column=0, sticky="nsew")"""
         # inserting radiobuttons
         self.ac_model_selected = customtkinter.StringVar(value="LSTM")
-        self.label_radio_group = customtkinter.CTkLabel(master=self.radiobutton_frame, text="MODEL SELECTION")
+        self.label_radio_group = customtkinter.CTkLabel(master=self.radiobutton_frame, text="MODEL SELECTION",
+                                                        font=("Helvetica", 18))
         self.label_radio_group.grid(row=0, column=0, columnspan=1, padx=10, pady=20, sticky="")
         self.radio_button_lsmt = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="LSTM",
-                                                                variable=self.ac_model_selected, value="LSTM",
-                                                                command=self.pressed_radiobutton)
-        self.radio_button_lsmt.grid(row=1, column=0, pady=(5,10), padx=20, sticky="w")
+                                                              variable=self.ac_model_selected, value="LSTM",
+                                                              command=self.pressed_radiobutton, font=("Helvetica", 16))
+        self.radio_button_lsmt.grid(row=1, column=0, pady=(5, 10), padx=20, sticky="w")
         self.radio_button_cnn = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="CNN - mfcc",
-                                                           variable=self.ac_model_selected, value="CNN", command=self.pressed_radiobutton)
+                                                             variable=self.ac_model_selected, value="CNN",
+                                                             command=self.pressed_radiobutton, font=("Helvetica", 16))
         self.radio_button_cnn.grid(row=2, column=0, pady=15, padx=20, sticky="w")
-        self.radio_button_cnnspec = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="CNN - spectrogram",
-                                                           variable=self.ac_model_selected, value="CNN (Spectrogram)", command=self.pressed_radiobutton)
+        self.radio_button_cnnspec = customtkinter.CTkRadioButton(master=self.radiobutton_frame,
+                                                                 text="CNN - spectrogram",
+                                                                 variable=self.ac_model_selected,
+                                                                 value="CNN (Spectrogram)",
+                                                                 command=self.pressed_radiobutton,
+                                                                 font=("Helvetica", 16))
         self.radio_button_cnnspec.grid(row=3, column=0, pady=15, padx=20, sticky="w")
-        self.radio_button_effnet = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="EfficientNet (suggested)",
-                                                           variable=self.ac_model_selected, value="EfficientNet", command=self.pressed_radiobutton)
-        self.radio_button_effnet.grid(row=4, column=0, pady=(15,0), padx=20, sticky="w")
+        self.radio_button_effnet = customtkinter.CTkRadioButton(master=self.radiobutton_frame,
+                                                                text="EfficientNet (suggested)",
+                                                                variable=self.ac_model_selected, value="EfficientNet",
+                                                                command=self.pressed_radiobutton,
+                                                                font=("Helvetica", 16))
+        self.radio_button_effnet.grid(row=4, column=0, pady=(15, 0), padx=20, sticky="w")
         # Label for model description
         self.ac_model_label = customtkinter.CTkLabel(master=self.tabview.tab("Audio classification"),
-                                                     text="99% training accuracy, 83% validation accuracy")
+                                                     text="99% training accuracy, 83% validation accuracy",
+                                                     font=("Helvetica", 16))
         self.ac_model_label.grid(row=0, column=1, padx=0, pady=(320, 5), sticky="n")
         # Images for models description
         self.ac_images_size = (500, 300)
@@ -169,24 +184,25 @@ class App(customtkinter.CTk):
             "images/ac_models/CNN_IMAGE.png"), size=self.ac_images_size)
         self.ac_effNet_image = customtkinter.CTkImage(dark_image=Image.open(
             "images/ac_models/pretr_efficientnet_64bs.png"), size=self.ac_images_size)
-        #displaying initial model image
+        # displaying initial model image
         self.ac_model_image = customtkinter.CTkLabel(master=self.tabview.tab("Audio classification"),
-                                                     image=self.ac_lsmt_image)
+                                                     image=self.ac_lsmt_image, text="")
         self.ac_model_image.grid(row=0, column=1, padx=(0, 5), pady=(20, 5), sticky="n")
-        #SONG CHOICE LABEL AND COMBOBOX 2
+        # SONG CHOICE LABEL AND COMBOBOX 2
         self.ac_songs_label = customtkinter.CTkLabel(master=self.tabview.tab("Audio classification"),
-                                                     text="SONG SELECTION")
-        self.ac_songs_label.grid(row=1, column=0, padx=(5, 5), pady=(25, 5))
+                                                     text="SONG SELECTION", font=("Helvetica", 18))
+        self.ac_songs_label.grid(row=1, column=0, padx=(5, 5), pady=(20, 5))
         self.ac_songs_combobox = customtkinter.CTkComboBox(master=self.tabview.tab("Audio classification"),
-                                                           state="readonly", values=self.audios_names_list)
-        self.ac_songs_combobox.grid(row=2, column=0, padx=10, pady=0)
+                                                           state="readonly", values=self.audios_names_list,
+                                                           font=("Helvetica", 16))
+        self.ac_songs_combobox.grid(row=2, column=0, padx=10, pady=(10,0))
         if self.audios_paths_list:
             self.ac_songs_combobox.set(self.audios_names_list[0])
         # GENRE PREDICTION BUTTON
         self.ac_predict_button = customtkinter.CTkButton(master=self.tabview.tab("Audio classification"),
-                                                     text="Predict song genre", command=self.predict_genre)
+                                                         text="Predict song genre", command=self.predict_genre,
+                                                         font=("Helvetica", 16))
         self.ac_predict_button.grid(row=3, column=0, padx=10, pady=15)
-
 
     def load_audios(self, new_dir_path):
         for root, subdirs, files in os.walk(new_dir_path):
@@ -250,14 +266,15 @@ class App(customtkinter.CTk):
                 data = mfcc_models.preprocess_dir(os.path.abspath(join(os.getcwd(), '..', Constants.INPUT_AUDIO)))
                 print(data)
                 if model == "CNN":
-                    result = mfcc_models.testaudiomodel(data, os.path.abspath(join(os.getcwd(), '..', Constants.CNN_PATH)))
+                    result = mfcc_models.testaudiomodel(data,
+                                                        os.path.abspath(join(os.getcwd(), '..', Constants.CNN_PATH)))
                 else:
                     print(os.path.abspath(join(os.getcwd(), '..', Constants.LSMT_PATH)))
-                    result = mfcc_models.testaudiomodel(data, os.path.abspath(join(os.getcwd(), '..', Constants.LSMT_PATH)))
+                    result = mfcc_models.testaudiomodel(data,
+                                                        os.path.abspath(join(os.getcwd(), '..', Constants.LSMT_PATH)))
                 print(result)
             case _:
                 print("Unknown error, change model")
-
 
     def handle_recording(self):
         if self.recording == 0:
