@@ -39,6 +39,33 @@ def preprocess_dataset(dataset_path, num_mfcc=40, n_fft=2048, hop_length=512, nu
     return data
 
 
+def preprocess_dir(dirpath, num_mfcc=40, n_fft=2048, hop_length=512, num_segment=10):
+    data = {"labels": [], "mfcc": [], "duration": [], "filenames": []}
+    sample_rate = 22050
+    samples_per_segment = int(sample_rate * 30 / num_segment)
+    label = 0
+    print(dirpath)
+    for root, dirs, files in os.walk(dirpath):
+        for file in files:
+            if not file.endswith('.wav'):
+                continue
+            file_path = os.path.join(root, file)
+            try:
+                y, sr = librosa.load(file_path, sr=sample_rate)
+            except:
+                continue
+            data["duration"].append(librosa.get_duration(y=y, sr=sr))
+            data["filenames"].append(file)
+            for n in range(num_segment):
+                mfcc = librosa.feature.mfcc(y=y[samples_per_segment * n: samples_per_segment * (n + 1)], sr=sample_rate,
+                                            n_mfcc=num_mfcc, n_fft=n_fft, hop_length=hop_length)
+                mfcc = mfcc.T
+                if len(mfcc) == math.ceil(samples_per_segment / hop_length):
+                    data["mfcc"].append(mfcc.tolist())
+                    data["labels"].append(label)
+                    label += 1
+    return data
+
 def createLSMTmodel(mfcc_data):
     x = np.array(mfcc_data["mfcc"])
     y = np.array(mfcc_data["labels"])
@@ -131,7 +158,7 @@ def testaudiomodel(mfcc_data, model_path):
     model = tf.keras.models.load_model(model_path)
     y_pred = model.predict(x)
     y_pred = np.argmax(y_pred, axis=1)
-    print(mfcc_data["duration"])
+    #print(mfcc_data["duration"])
     numbers_per_audio = []
     for second in mfcc_data["duration"]:
         numbers_per_audio.append(min(math.floor(10 * second / 30), 10))
@@ -145,7 +172,6 @@ def testaudiomodel(mfcc_data, model_path):
     audio_genres = []
     for arr in y_pred:
         audio_genres.append(general.most_frequent(arr))
-    print(audio_genres)
     return audio_genres
 
 

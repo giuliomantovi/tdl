@@ -235,25 +235,28 @@ class App(customtkinter.CTk):
                 self.ac_model_image.configure(image=self.ac_lsmt_image)
 
     def predict_genre(self):
-        from audio_classification.mfcc_models import preprocess_dataset, testaudiomodel
+        from audio_classification import mfcc_models, general
         model = self.ac_model_selected.get()
         print(model)
         match model:
             case "EfficientNet":
                 print("effnet")
-            case "CNN" | "LSTM":
-                print("CNN/LSMT")
-                data = preprocess_dataset(Constants.INPUT_AUDIO)
-                if model == "CNN":
-                    result = testaudiomodel(data, os.path.abspath(join(os.getcwd(), '..', Constants.CNN_PATH)))
-                else:
-                    print(os.path.abspath(join(os.getcwd(), '..', Constants.LSMT_PATH)))
-                    result = testaudiomodel(data, "C:/Users/Utente/UNI/tesina_LAUREA/audio_classification/GTZAN_DB/models/GTZAN_LSTM.h5")
-                print(result)
+                general.audio_to_spectrograms(os.path.abspath(join(os.getcwd(), '..', Constants.INPUT_AUDIO)), "EffNet")
             case "CNN (Spectrogram)":
                 print("CNN IMAGE")
+                general.audio_to_spectrograms(os.path.abspath(join(os.getcwd(), '..', Constants.INPUT_AUDIO)), "CNN")
+            case "CNN" | "LSTM":
+                print("CNN/LSMT")
+                data = mfcc_models.preprocess_dir(os.path.abspath(join(os.getcwd(), '..', Constants.INPUT_AUDIO)))
+                print(data)
+                if model == "CNN":
+                    result = mfcc_models.testaudiomodel(data, os.path.abspath(join(os.getcwd(), '..', Constants.CNN_PATH)))
+                else:
+                    print(os.path.abspath(join(os.getcwd(), '..', Constants.LSMT_PATH)))
+                    result = mfcc_models.testaudiomodel(data, os.path.abspath(join(os.getcwd(), '..', Constants.LSMT_PATH)))
+                print(result)
             case _:
-                print("Unknown error")
+                print("Unknown error, change model")
 
 
     def handle_recording(self):

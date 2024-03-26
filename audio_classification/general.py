@@ -1,5 +1,45 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
+import librosa
+from Config import Constants
+
+
+def create_mel_spectrogram(dirpath, filename, model):
+    # spectrogram with musical components (that humans can hear)
+    # if image has already been created, skip
+    if model == "CNN" and os.path.exists(os.path.join(dirpath, "cnn_spec", filename[:-4]) + ".png"):
+        return
+    elif model == "EffNet" and os.path.exists(os.path.join(dirpath, "effnet_spec", filename[:-4]) + ".png"):
+        return
+    y, sr = librosa.load(str(os.path.join(dirpath, filename)))
+    s = librosa.feature.melspectrogram(y=y, sr=44100, hop_length=308, win_length=2205,
+                                       n_mels=128, n_fft=4096, fmax=18000, norm='slaney')
+    s_db_mel = librosa.amplitude_to_db(s, ref=np.max)
+    print(s_db_mel.shape)
+    effnet_figsize = (2, 2)
+    CNN_figsize = (4.32, 2.88)
+
+    if model == "CNN":
+        fig, ax = plt.subplots(figsize=CNN_figsize)
+        img = librosa.display.specshow(s_db_mel, ax=ax)
+        plt.savefig(fname=os.path.join(dirpath, "cnn_spec", filename[:-4]) + ".png", format='png')
+
+    else:
+        fig, ax = plt.subplots(figsize=effnet_figsize)
+        img = librosa.display.specshow(s_db_mel, ax=ax)
+        plt.savefig(fname=os.path.join(dirpath, "effnet_spec", filename[:-4]) + ".png", format='png')
+
+
+    # plt.show()
+
+
+def audio_to_spectrograms(dir_path, model):
+    for root, subdirs, files in os.walk(dir_path):
+        for filename in files:
+            if filename.endswith(".wav"):
+                #file_path = os.path.join(root, filename)
+                create_mel_spectrogram(root, filename, model)
 
 
 def most_frequent(arr):
@@ -20,6 +60,15 @@ def plot_hist(hist):
     plt.legend(["train", "validation"], loc="upper left")
     plt.show()
 
+
+"""def create_spectrogram(audio):
+    y, sr = librosa.load(audio)
+    D = librosa.stft(y)
+    S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
+    print(S_db.shape)
+    fig, ax = plt.subplots(figsize=(4.5, 3))
+    img = librosa.display.specshow(S_db, ax=ax)
+    plt.show()"""
 
 """
 def plot_history(history, name):

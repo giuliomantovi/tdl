@@ -6,13 +6,14 @@ from keras import layers, models
 from keras.optimizers import Adam
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
-import librosa
+
 import matplotlib.pyplot as plt
 from audio_classification import general
 
 from Config import Constants
 
 
+# for training with dataset
 def load_image_data(img_folder):
     x = []
     y = []
@@ -28,9 +29,8 @@ def load_image_test(img_folder):
     x = []
     for root, subdirs, files in os.walk(img_folder):
         for filename in files:
-            x = x + [cv2.imread(os.path.join(root, filename))]
+            x = x + [cv2.imread(str(os.path.join(root, filename)))]
     return np.array(x)
-
 
 
 def createCNNimagemodel(image_folder):
@@ -82,29 +82,6 @@ def createCNNimagemodel(image_folder):
     general.plot_hist(history)
 
 
-def create_mel_spectrogram(audio_path, filename):
-    # spectrogram with musical components (that humans can hear)
-    y, sr = librosa.load(audio_path)
-    s = librosa.feature.melspectrogram(y=y, sr=44100, hop_length=308, win_length=2205,
-                                       n_mels=128, n_fft=4096, fmax=18000, norm='slaney')
-    s_db_mel = librosa.amplitude_to_db(s, ref=np.max)
-    print(s_db_mel.shape)
-    effnet_figsize=(2, 2)
-    CNN_figsize=(4.32, 2.88)
-    fig, ax = plt.subplots(figsize=effnet_figsize)
-    img = librosa.display.specshow(s_db_mel, ax=ax)
-    plt.savefig(fname=Constants.INPUT_IMAGES_EFFNET + "/" + filename + ".png", format='png')
-    # plt.show()
-
-
-def audio_to_spectrograms(dir_path):
-    for root, subdirs, files in os.walk(dir_path):
-        for filename in files:
-            if filename.endswith(".wav"):
-                file_path = os.path.join(root, filename)
-                create_mel_spectrogram(file_path, filename[:-4])
-
-
 def testimagemodel(images_path, model_path):
     x_img = load_image_test(images_path)
     model = tf.keras.models.load_model(model_path)
@@ -114,11 +91,3 @@ def testimagemodel(images_path, model_path):
     print(y_pred)
 
 
-"""def create_spectrogram(audio):
-    y, sr = librosa.load(audio)
-    D = librosa.stft(y)
-    S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
-    print(S_db.shape)
-    fig, ax = plt.subplots(figsize=(4.5, 3))
-    img = librosa.display.specshow(S_db, ax=ax)
-    plt.show()"""

@@ -29,11 +29,11 @@ if __name__ == '__main__':
     # predict_genre_from_lyrics()
     # lda_model.create_model()
     # evaluate_text_classifier() 46%
-    # data = mfcc_models.preprocess_dataset(GTZAN_AUDIO_PATH)
+    data = mfcc_models.preprocess_dataset(GTZAN_AUDIO_PATH)
     # mfcc_models.createCNNmodel(data)
     # mfcc_models.testaudiomodel(data,LSMT_PATH)
     # spectrogram_models.createCNNimagemodel(GTZAN_IMAGE_PATH)
-    efficientnet_model.create_pretrained_efficientnet_model(GTZAN_IMAGE_PATH)
+    # efficientnet_model.create_pretrained_efficientnet_model(GTZAN_IMAGE_PATH)
     # create_pretrained_efficientnet_model(Constants.GTZAN_IMAGE_PATH)
     # convert_to_wav(Constants.INPUT_AUDIO)
     # CREATING SPECTROGRAMS FROM .WAV DIR
