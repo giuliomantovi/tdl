@@ -3,11 +3,15 @@ import librosa
 import os
 import numpy as np
 import tensorflow as tf
+from posixpath import join
 from audio_classification import general
 from keras import layers, models
+from keras.callbacks import CSVLogger
 from sklearn.model_selection import train_test_split
 
 from Config import Constants
+
+logger_path = os.path.abspath(join(os.getcwd(), Constants.LOGGER_PATH))
 
 
 def preprocess_dataset(dataset_path, num_mfcc=40, n_fft=2048, hop_length=512, num_segment=10):
@@ -66,7 +70,8 @@ def preprocess_dir(dirpath, num_mfcc=40, n_fft=2048, hop_length=512, num_segment
                     label += 1
     return data
 
-def createLSMTmodel(mfcc_data):
+def createLSTMmodel(mfcc_data):
+
     x = np.array(mfcc_data["mfcc"])
     y = np.array(mfcc_data["labels"])
     #print(list(x))
@@ -80,8 +85,8 @@ def createLSMTmodel(mfcc_data):
     model.add(tf.keras.layers.LSTM(64))
     model.add(tf.keras.layers.Dense(64, activation="relu"))
     model.add(tf.keras.layers.Dense(units=Constants.NUM_CLASSES, activation="softmax"))
-    #NO DROPOUT, 50 EPOCHS, 32 bs (LSMT.h5) 188/188 - 3s - loss: 0.0243 - accuracy: 0.9933 - val_loss: 0.8696 - val_accuracy: 0.8318 - 3s/epoch - 15ms/step
-    #0.1 dropout, 60 epochs, 32 bs  188/188 - 2s - loss: 0.0292 - accuracy: 0.9912 - val_loss: 0.9628 - val_accuracy: 0.8258 - 2s/epoch - 13ms/step
+    # NO DROPOUT, 50 EPOCHS, 32 bs (LSTM.h5) 188/188 - 2s - loss: 0.0145 - accuracy: 0.9957 - val_loss: 0.8552 - val_accuracy: 0.8371 - 2s/epoch - 13ms/step
+    # 0.1 dropout, 60 epochs, 32 bs  188/188 - 2s - loss: 0.0292 - accuracy: 0.9912 - val_loss: 0.9628 - val_accuracy: 0.8258 - 2s/epoch - 13ms/step
     # 0.1 dr, 50 epochs, 64bs 94/94 - 1s - loss: 0.1078 - accuracy: 0.9643 - val_loss: 0.7735 - val_accuracy: 0.8017 - 1s/epoch - 14ms/step
     # 0.2 dr, 100 epochs,64 bs # 0.1 dr, 50 epochs, 64bs 94/94 - 1s - loss: 0.1078 - accuracy: 0.9643 - val_loss: 0.7735 - val_accuracy: 0.8017 - 1s/epoch - 14ms/step
     optimiser = tf.keras.optimizers.Adam(learning_rate=0.001)
@@ -89,8 +94,9 @@ def createLSMTmodel(mfcc_data):
                   loss='sparse_categorical_crossentropy',
                   metrics=['accuracy'])
     model.summary()
-    history = model.fit(x_train, y_train, validation_data=(x_val, y_val), batch_size=32, epochs=50, verbose=2)
-    model.save("audio_classification/GTZAN_DB/models/GTZAN_LSTM_2.h5")
+    csv_logger = CSVLogger(logger_path + "\\LSTM.log", separator=',', append=False)
+    history = model.fit(x_train, y_train, callbacks=csv_logger, validation_data=(x_val, y_val), batch_size=32, epochs=50, verbose=2)
+    model.save("audio_classification/GTZAN_DB/models/LSTM_2.h5")
     # testing accuracy
     y_pred = model.predict(x_test)
     y_pred = np.argmax(y_pred, axis=1)
@@ -131,8 +137,9 @@ def createCNNmodel(mfcc_data):
     cnn_model.compile(loss='binary_crossentropy', optimizer='adam', metrics='accuracy')
     cnn_model.summary()
     # 188/188 - 2s - loss: 0.0239 - acc: 0.9680 - val_loss: 0.0694 - val_acc: 0.8992 - 2s/epoch - 9ms/step
-    history = cnn_model.fit(x_train, y_train, validation_data=(x_val, y_val), batch_size=32, epochs=40, verbose=2)
-    cnn_model.save("audio_classification/GTZAN_DB/models/GTZAN_CNN_2.h5")
+    csv_logger = CSVLogger(logger_path + "\\cnn.log", separator=',', append=False)
+    history = cnn_model.fit(x_train, y_train, callbacks=csv_logger, validation_data=(x_val, y_val), batch_size=32, epochs=40, verbose=2)
+    cnn_model.save("audio_classification/GTZAN_DB/models/CNN_2.h5")
     # testing accuracy
     y_pred = cnn_model.predict(x_test)
     y_pred = np.argmax(y_pred, axis=1)
@@ -169,13 +176,13 @@ def testaudiomodel(mfcc_data, model_path):
     print(mfcc_data["filenames"])
     y_pred = np.split(y_pred, numbers_per_audio[:-1])
     print(y_pred)
-    values = []
+    genres = []
     percentages = []
     for arr in y_pred:
-        val, perc = general.three_most_frequent(arr)
-        values.append(val)
+        gen, perc = general.three_most_frequent(arr)
+        genres.append(gen)
         percentages.append(perc)
-    return values, percentages
+    return genres, percentages
 
 
 

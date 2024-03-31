@@ -17,6 +17,8 @@ INPUT_TEXT = "Config/input/text"
 
 OUTPUT_AUDIO = "Config/output_audio/"
 
+LOGGER_PATH = "audio_classification/GTZAN_DB/loggers"
+
 # dataset paths
 
 GTZAN_AUDIO_PATH = "audio_classification/GTZAN_DB/Data/genres_original"
@@ -37,7 +39,7 @@ WASABI_LDA_DICTIONARY = "lyrics_classification/WASABI_DB/topics/dictionary.pickl
 
 LSMT_PATH = "audio_classification/GTZAN_DB/models/LSTM.h5"
 
-CNN_PATH = "audio_classification/GTZAN_DB/models/CNN.h5"
+CNN_PATH = "audio_classification/GTZAN_DB/models/cnn.h5"
 
 CNN_IMAGE_PATH = "audio_classification/GTZAN_DB/models/CNN_IMAGE.h5"
 

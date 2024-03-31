@@ -40,13 +40,14 @@ class App(customtkinter.CTk):
     play = customtkinter.CTkImage(Image.open("icons/play.png"))
     stop = customtkinter.CTkImage(Image.open("icons/stop.png"))
     microphone = customtkinter.CTkImage(Image.open("icons/microphone.png"))
+    audios_dir = os.path.abspath(join(os.getcwd(), '..', Constants.INPUT_AUDIO))
 
     # songs_combobox = 0
 
     def __init__(self):
 
         super().__init__()
-        self.geometry(f"{1100}x{580}")
+        self.geometry(f"{1050}x{600}")
         self.title("Music classifier")
         # configure grid layout (2x2)
         self.grid_columnconfigure(1, weight=1)
@@ -137,7 +138,7 @@ class App(customtkinter.CTk):
         # self.tabview.tab("Audio classification").grid_columnconfigure(0, weight=1)  # configure grid of individual tabs
         # self.tabview.tab("Tab 2").grid_columnconfigure(0, weight=1)
 
-        # AUDIO CLASSIFICATION TAB:
+        """AUDIO CLASSIFICATION TAB:    -   -   -   -   -   -   -   -   -   -   -   -"""
         # create radiobutton frame for ac
         self.radiobutton_frame = customtkinter.CTkFrame(self.tabview.tab("Audio classification"))
         self.radiobutton_frame.grid(row=0, column=0, padx=(20, 20), pady=(20, 5), sticky="nsew")
@@ -161,7 +162,7 @@ class App(customtkinter.CTk):
         self.radio_button_cnnspec = customtkinter.CTkRadioButton(master=self.radiobutton_frame,
                                                                  text="CNN - spectrogram",
                                                                  variable=self.ac_model_selected,
-                                                                 value="CNN (Spectrogram)",
+                                                                 value="CNN spectrogram",
                                                                  command=self.pressed_radiobutton,
                                                                  font=("Helvetica", 16))
         self.radio_button_cnnspec.grid(row=3, column=0, pady=15, padx=20, sticky="w")
@@ -171,49 +172,49 @@ class App(customtkinter.CTk):
                                                                 command=self.pressed_radiobutton,
                                                                 font=("Helvetica", 16))
         self.radio_button_effnet.grid(row=4, column=0, pady=(15, 0), padx=20, sticky="w")
-        # Label for model description
-        self.ac_model_label = customtkinter.CTkLabel(master=self.tabview.tab("Audio classification"),
-                                                     text="99% training accuracy, 83% validation accuracy",
-                                                     font=("Helvetica", 16))
-        self.ac_model_label.grid(row=0, column=1, padx=0, pady=(320, 5), sticky="n")
         # Images for models description
-        self.ac_images_size = (500, 300)
+        # 662 x 480
+        self.ac_images_size = (450, 270)
         self.ac_lsmt_image = customtkinter.CTkImage(dark_image=Image.open(
-            "images/ac_models/LSTM.png"), size=self.ac_images_size)
+            "images/ac_models/LSTM_dark.png"), size=self.ac_images_size)
         self.ac_cnn_image = customtkinter.CTkImage(dark_image=Image.open(
-            "images/ac_models/CNN.png"), size=self.ac_images_size)
+            "images/ac_models/CNN_dark.png"), size=self.ac_images_size)
         self.ac_cnnImage_image = customtkinter.CTkImage(dark_image=Image.open(
-            "images/ac_models/CNN_IMAGE.png"), size=self.ac_images_size)
+            "images/ac_models/CNN_IMAGE_dark.png"), size=self.ac_images_size)
         self.ac_effNet_image = customtkinter.CTkImage(dark_image=Image.open(
-            "images/ac_models/pretr_efficientnet_64bs.png"), size=self.ac_images_size)
+            "images/ac_models/EFFNET_dark.png"), size=self.ac_images_size)
         # displaying initial model image
         self.ac_model_image = customtkinter.CTkLabel(master=self.tabview.tab("Audio classification"),
                                                      image=self.ac_lsmt_image, text="")
-        self.ac_model_image.grid(row=0, column=1, padx=(0, 5), pady=(20, 5), sticky="n")
+        self.ac_model_image.grid(row=0, column=1, padx=(25, 5), pady=(20, 5), sticky="n")
         # SONG CHOICE LABEL AND COMBOBOX 2
         self.ac_songs_label = customtkinter.CTkLabel(master=self.tabview.tab("Audio classification"),
-                                                     text="SONG SELECTION", font=("Helvetica", 18))
+                                                     text="SONG GENRE PREDICTION", font=("Helvetica", 18))
         self.ac_songs_label.grid(row=1, column=0, padx=(5, 5), pady=(20, 5))
         self.ac_songs_combobox = customtkinter.CTkComboBox(master=self.tabview.tab("Audio classification"),
                                                            state="readonly", values=self.audios_names_list,
-                                                           font=("Helvetica", 16))
-        self.ac_songs_combobox.grid(row=2, column=0, padx=10, pady=(10, 0))
+                                                           font=("Helvetica", 16), command=self.ac_change_song)
+        self.ac_songs_combobox.grid(row=2, column=0, padx=10, pady=(35, 35))
         if self.audios_paths_list:
             self.ac_songs_combobox.set(self.audios_names_list[0])
         # GENRE PREDICTION BUTTON AND IMAGE
         self.ac_predict_button = customtkinter.CTkButton(master=self.tabview.tab("Audio classification"),
-                                                         text="Create genre predictions", command=self.predict_genre,
+                                                         text="Create genre predictions",
+                                                         command=self.ac_predict_genre,
                                                          font=("Helvetica", 16))
-        self.ac_predict_button.grid(row=3, column=0, padx=10, pady=15)
+        self.ac_predict_button.grid(row=3, column=0, padx=10, pady=(15, 5))
         self.ac_prediction_image = customtkinter.CTkLabel(master=self.tabview.tab("Audio classification"),
                                                           image=None, text="")
         self.ac_prediction_image.grid(row=1, column=1, rowspan=3, padx=(0, 0), pady=(20, 0), sticky="n")
-        audios_dir = os.path.abspath(join(os.getcwd(), '..', Constants.INPUT_AUDIO))
-        selected_song = self.ac_songs_combobox.get()
-        selected_image = join(audios_dir, "genre_predictions", selected_song) + ".png"
-        if os.path.exists(selected_image):
-            ac_genres_image = customtkinter.CTkImage(dark_image=Image.open(selected_image), size=(256, 192))
+        ac_selected_song = self.ac_songs_combobox.get()
+        ac_selected_image = join(self.audios_dir, "genre_predictions", ac_selected_song) + ".png"
+        if os.path.exists(ac_selected_image):
+            ac_genres_image = customtkinter.CTkImage(dark_image=Image.open(ac_selected_image), size=(256, 192))
             self.ac_prediction_image.configure(image=ac_genres_image)
+
+        """LYRICS CLASSIFICATION TAB:    -   -   -   -   -   -   -   -   -   -   -   -"""
+
+
 
     def load_audios(self, new_dir_path):
         for root, subdirs, files in os.walk(new_dir_path):
@@ -240,79 +241,93 @@ class App(customtkinter.CTk):
                 shutil.copy(audio, new_audio_path)
         general.convert_to_wav(new_dir_path)
         self.load_audios(new_dir_path)
-        # enabling components state
-
-        # if audios_paths_list:
-        #    show_player()
-        # print(audios_paths_list)
 
     def pressed_radiobutton(self):
         match self.ac_model_selected.get():
             case "EfficientNet":
-                self.ac_model_label.configure(text="93% training accuracy, 74% validation accuracy")
                 self.ac_model_image.configure(image=self.ac_effNet_image)
             case "CNN":
-                self.ac_model_label.configure(text="97% training accuracy, 90% validation accuracy")
                 self.ac_model_image.configure(image=self.ac_cnn_image)
-            case "CNN (Spectrogram)":
-                self.ac_model_label.configure(text="100% training accuracy, 65% validation accuracy")
+            case "CNN spectrogram":
                 self.ac_model_image.configure(image=self.ac_cnnImage_image)
             case "LSTM":
-                self.ac_model_label.configure(text="99% training accuracy, 83% validation accuracy")
                 self.ac_model_image.configure(image=self.ac_lsmt_image)
 
-    def predict_genre(self):
+    def ac_change_song(self, choice):
+        selected_image = join(self.audios_dir, "genre_predictions", choice) + ".png"
+        ac_genres_image = customtkinter.CTkImage(dark_image=Image.open(selected_image), size=(256, 192))
+        self.ac_prediction_image.configure(image=ac_genres_image)
+
+    def ac_predict_genre(self):
         from audio_classification import general
+        self.ac_prediction_image.configure(image='')
+        self.ac_prediction_image.configure(text="Loading...")
+        self.ac_prediction_image.update()
+
         model = self.ac_model_selected.get()
-        audios_dir = os.path.abspath(join(os.getcwd(), '..', Constants.INPUT_AUDIO))
-        values = percentages = []
+        genres = percentages = []
         match model:
             case "EfficientNet":
                 from audio_classification import efficientnet_model
                 print("effnet")
-                general.audio_to_spectrograms(audios_dir, "EffNet")
-                efficientnet_model.testefficientnetmodel(join(audios_dir, "effnet_spec"),
-                                                         os.path.abspath(join(os.getcwd(), '..',
-                                                                              Constants.EFFICIENTNET_PRETRAINED_PATH)))
-            case "CNN (Spectrogram)":
+                general.audio_to_spectrograms(self.audios_dir, "EffNet")
+                model_path = os.path.abspath(join(os.getcwd(), '..', Constants.EFFICIENTNET_PRETRAINED_PATH))
+                images_path = join(self.audios_dir, "effnet_spec")
+                genres, percentages = efficientnet_model.testefficientnetmodel(images_path, model_path)
+            case "CNN spectrogram":
                 from audio_classification import spectrogram_models
                 print("CNN IMAGE")
-                general.audio_to_spectrograms(audios_dir, "CNN")
-                spectrogram_models.testimagemodel(join(audios_dir, "cnn_spec"),
-                                                  os.path.abspath(join(os.getcwd(), '..', Constants.CNN_IMAGE_PATH)))
+                general.audio_to_spectrograms(self.audios_dir, "cnn")
+                model_path = os.path.abspath(join(os.getcwd(), '..', Constants.CNN_IMAGE_PATH))
+                images_path = join(self.audios_dir, "cnn_spec")
+                genres, percentages = spectrogram_models.testimagemodel(images_path, model_path)
             case "CNN" | "LSTM":
                 from audio_classification import mfcc_models
                 print("CNN/LSMT")
-                data = mfcc_models.preprocess_dir(audios_dir)
+                data = mfcc_models.preprocess_dir(self.audios_dir)
                 if model == "CNN":
-                    values, percentages = mfcc_models.testaudiomodel(data,
-                                                                     os.path.abspath(
-                                                                         join(os.getcwd(), '..', Constants.CNN_PATH)))
+                    model_path = Constants.CNN_PATH
                 else:
-                    values, percentages = mfcc_models.testaudiomodel(data,
-                                                                     os.path.abspath(
-                                                                         join(os.getcwd(), '..', Constants.LSMT_PATH)))
+                    model_path = Constants.LSMT_PATH
+                model_path = os.path.abspath(join(os.getcwd(), '..', model_path))
+                genres, percentages = mfcc_models.testaudiomodel(data, model_path)
             case _:
                 print("Unknown error, change model")
-        print(values)
+        print(" GENRES: ")
+        print(genres)
+        print("PERC: ")
         print(percentages)
-        for i in range(len(values)):
+        print(model)
+        self.ac_create_predictions_plot(model, genres, percentages)
+        self.ac_prediction_image.configure(text="")
+        self.ac_change_song(self.ac_songs_combobox.get())
+        self.ac_predict_button.configure(state="normal")
+        # plt.show()
+
+    def ac_create_predictions_plot(self, model, genres, percentages):
+        color = 'white'
+        plt.rcParams['text.color'] = color
+        plt.rcParams['axes.edgecolor'] = color
+        plt.rcParams['axes.labelcolor'] = color
+        plt.rcParams['xtick.color'] = color
+        plt.rcParams['ytick.color'] = color
+        plt.rcParams['font.size'] = 22
+
+        for i in range(len(genres)):
             plt.clf()
-            x = np.array(values[i])
+            x = np.array(genres[i])
             y = np.array(percentages[i])
             filename = self.audios_names_list[i]
             print(filename)
-            plt.title(filename)
+            plt.ylabel("probability")
+            plt.title(filename + " " + model[:12])
+            plt.bar(x, y, width=0.6, align='center')
             plt.ylim(0, 1)
-            plt.bar(x, y, width=0.4, align='center')
-            if len(values[i]) == 1:
+            if len(genres[i]) == 1:
                 plt.xlim(-1, 1)
-            plt.savefig(fname=os.path.join(audios_dir, "genre_predictions", filename) + ".png", format='png')
-        selected_song = self.ac_songs_combobox.get()
-        selected_image = join(audios_dir, "genre_predictions", selected_song) + ".png"
-        ac_genres_image = customtkinter.CTkImage(dark_image=Image.open(selected_image), size=(256, 192))
-        self.ac_prediction_image.configure(image=ac_genres_image)
-        # plt.show()
+            plt.savefig(fname=os.path.join(self.audios_dir, "genre_predictions", filename) + ".png", format='png',
+                        bbox_inches="tight", transparent=True)
+        plt.clf()
 
     def handle_recording(self):
         if self.recording == 0:

@@ -4,14 +4,15 @@ import tensorflow as tf
 import cv2
 from keras import layers, models
 from keras.optimizers import Adam
+from keras.callbacks import CSVLogger
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
+from posixpath import join
 
-import matplotlib.pyplot as plt
 from audio_classification import general
 
 from Config import Constants
-
+logger_path = os.path.abspath(join(os.getcwd(), Constants.LOGGER_PATH))
 
 # for training with dataset
 def load_image_data(img_folder):
@@ -65,15 +66,17 @@ def createCNNimagemodel(image_folder):
     image_model.compile(optimizer=opt,
                         loss='sparse_categorical_crossentropy',
                         metrics=['accuracy'])
-    # kernsize=3, bs16, ep50 39/39, dr=0.2 - 4s - loss: 0.0023 - accuracy: 1.0000 - val_loss: 1.4433 - val_accuracy: 0.6346 - 4s/epoch - 98ms/step
+    # kernsize=3, bs16, ep25 39/39, dr=0.2 - loss: 0.0216 - accuracy: 0.9968 - val_loss: 1.1278 - val_accuracy: 0.6282 - 4s/epoch - 98ms/step
     #(IMAGE_CNN) kernsize=3, bs16, ep50 39/39, dr=ndr 39/39 - 4s - loss: 0.0021 - accuracy: 1.0000 - val_loss: 1.4967 - val_accuracy: 0.6474 - 4s/epoch - 97ms/step
     #non cambia nulla con o senza dropout
+    csv_logger = CSVLogger(logger_path + "\\CNN_IMAGE.log", separator=',', append=False)
     history = image_model.fit(x_train, y_train,
-                              epochs=30,  # 100
+                              callbacks=csv_logger,
+                              epochs=25,  # 100
                               validation_data=(x_val, y_val),
                               batch_size=16,  # 32
                               verbose=2)
-    image_model.save("audio_classification/models/CNN_IMAGE.h5")
+    image_model.save("audio_classification/GTZAN_DB/models/CNN_IMAGE_2.h5")
     # test
     y_pred = image_model.predict(x_test)
     y_pred = np.argmax(y_pred, axis=1)
@@ -87,7 +90,9 @@ def testimagemodel(images_path, model_path):
     model = tf.keras.models.load_model(model_path)
     y_pred = model.predict(x_img)
     print(y_pred)
-    y_pred = np.argmax(y_pred, axis=1)
-    print(y_pred)
+    genres, percentages = general.translate_predictions(y_pred, [])
+    #y_pred = np.argmax(y_pred, axis=1)
+    #print(y_pred)
+    return genres, percentages
 
 

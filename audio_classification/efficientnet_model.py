@@ -3,13 +3,15 @@ import numpy as np
 import tensorflow as tf
 import cv2
 from keras import layers
+from posixpath import join
+from keras.callbacks import CSVLogger
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
 from Config import Constants
 from audio_classification import general
 
-
+logger_path = os.path.abspath(join(os.getcwd(), Constants.LOGGER_PATH))
 
 
 def load_resize_image_test(img_folder):
@@ -17,7 +19,7 @@ def load_resize_image_test(img_folder):
     names = []
     for root, subdirs, files in os.walk(img_folder):
         for filename in files:
-            x = x + [cv2.resize(cv2.imread(os.path.join(root, filename)), (200, 200))]
+            x = x + [cv2.resize(cv2.imread(str(os.path.join(root, filename))), (200, 200))]
             names.append(filename)
     return np.array(x), names
 
@@ -81,23 +83,26 @@ def create_pretrained_efficientnet_model(image_folder):
     epochs = 50  # @param {type: "slider", min:8, max:80}
     """ epochs frozen = 50, epochs unfrozen = 20 batch_size=64
     loss: 0.2116 - accuracy: 0.9342 - val_loss: 1.1934 - val_accuracy: 0.7372"""
+    csv_logger = CSVLogger(logger_path + "\\EFFNET.log", separator=',', append=True)
     history = model.fit(x_train, y_train,
-                     epochs=epochs,  # 100
-                     validation_data=(x_val, y_val),
-                     batch_size=64)
-
+                        callbacks=csv_logger,
+                        epochs=epochs,  # 100
+                        validation_data=(x_val, y_val),
+                        batch_size=64)
+    #1s 94ms/step - loss: 0.1842 - accuracy: 0.9390 - val_loss: 1.3407 - val_accuracy: 0.7179
     # 2 step
     unfreeze_model(model)
     epochs = 20
     history2 = model.fit(x_train, y_train,
-                     epochs=epochs,  # 100
-                     validation_data=(x_val, y_val),
-                     batch_size=64)
-    #general.plot_hist(hist)
+                         callbacks=csv_logger,
+                         epochs=epochs,  # 100
+                         validation_data=(x_val, y_val),
+                         batch_size=64)
+    # general.plot_hist(hist)
     history.history["accuracy"] += history2.history["accuracy"]
     history.history["val_accuracy"] += history2.history["val_accuracy"]
     general.plot_hist(history)
-    model.save("audio_classification/GTZAN_DB/models/EFFICIENTNETB0.h5")
+    model.save("audio_classification/GTZAN_DB/models/EFFICIENTNETB0_2.h5")
     y_pred = model.predict(x_img)
     y_pred = np.argmax(y_pred, axis=1)
     print(y_pred)
@@ -107,10 +112,9 @@ def testefficientnetmodel(images_path, model_path):
     x_img, names = load_resize_image_test(images_path)
     model = tf.keras.models.load_model(model_path)
     y_pred = model.predict(x_img)
-    general.translate_predictions(y_pred, names)
+    genres, percentages = general.translate_predictions(y_pred, names)
     # y_pred = np.argmax(y_pred, axis=1)
-
-
+    return genres, percentages
 
 
 """def create_scratch_efficientnet_model(image_folder):
