@@ -107,8 +107,9 @@ def testefficientnetmodel(images_path, model_path):
     x_img, names = load_resize_image_test(images_path)
     model = tf.keras.models.load_model(model_path)
     y_pred = model.predict(x_img)
-    general.translate_predictions(y_pred, names)
+    genres, percentages = general.translate_predictions(y_pred, names)
     # y_pred = np.argmax(y_pred, axis=1)
+    return genres, percentages
 
 
 

@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import os
 import librosa
 from Config import Constants
@@ -52,6 +53,7 @@ def most_frequent(arr):
 
 
 def three_most_frequent(arr):
+    #find 3 most frequent genres for mfcc based models
     values, counts = np.unique(arr, return_counts=True)
     total = sum(counts)
     different_val = min(3, len(values))
@@ -64,16 +66,25 @@ def three_most_frequent(arr):
 
 
 def translate_predictions(predictions, names):
+    #decodes prediction array for efficientnet model predictions
+    genres = []
+    percentages = []
     for i in range(len(predictions)):
+        gen = []
+        perc = []
         print(names[i].split(".")[0])
         three_largest, indexes = find3largest(predictions[i])
         tot = sum(three_largest)
         for j in range(len(three_largest)):
-            three_largest[j] = round(three_largest[j] / tot * 100, 0)
+            three_largest[j] = round(three_largest[j] / tot, 2)
         for j in range(len(three_largest)):
             if three_largest[j] != 0.:
+                gen.append(genre_dict[indexes[j]])
+                perc.append(three_largest[j])
                 print(genre_dict[indexes[j]] + ": " + str(int(three_largest[j])) + "%")
-        print()
+        genres.append(gen)
+        percentages.append(perc)
+    return genres, percentages
 
 
 def find3largest(array, arr_size=Constants.NUM_CLASSES):
@@ -103,19 +114,54 @@ def find3largest(array, arr_size=Constants.NUM_CLASSES):
 
     return [first, second, third], [first_index, second_index, third_index]
 
+def set_plot():
+    color = 'white'
+    plt.rcParams['axes.edgecolor'] = color
+    plt.rcParams['text.color'] = color
+    plt.rcParams['legend.framealpha'] = 0.1
+    plt.rcParams['axes.labelcolor'] = color
+    plt.rcParams['xtick.color'] = color
+    plt.rcParams['ytick.color'] = color
+    plt.rcParams['lines.linewidth'] = 3
+    plt.rcParams['font.size'] = 18
+
 
 def plot_hist(hist):
+    set_plot()
     plt.plot(hist.history["accuracy"])
     plt.plot(hist.history["val_accuracy"])
     # plt.plot(hist.history["loss"])
     # plt.plot(hist.history["val_loss"])
     # plt.ylim(0.0, 1.0)
-    plt.title("model accuracy")
+    plt.title("Model accuracy")
     plt.ylabel("accuracy")
     plt.xlabel("epoch")
     plt.legend(["train", "validation"], loc="upper left")
     plt.show()
+    plt.clf()
 
+
+def plot_logger(path):
+    if not os.path.exists(path):
+        return
+    history = pd.read_csv(path, sep=',', engine='python')
+    set_plot()
+    acc = history["accuracy"]
+    val_acc = history["val_accuracy"]
+    plt.plot(acc)
+    plt.plot(val_acc)
+    for var in (acc, val_acc):
+        perc = round(var.max()*100, 1)
+        plt.annotate(str(perc) + "%", xy=(1, var.max()), xytext=(8, 0),
+                     xycoords=('axes fraction', 'data'), textcoords='offset points')
+    plt.title("LSTM model")
+    plt.ylabel("accuracy")
+    plt.xlabel("epoch")
+    plt.legend(["train", "validation"], loc="upper left")
+    plt.savefig(fname="C:/Users/Utente/UNI/tesina_LAUREA/GUI/images/ac_models/CNN_dark.png", format='png',
+                bbox_inches="tight",
+                 transparent=True)
+    plt.clf()
 
 """def create_spectrogram(audio):
     y, sr = librosa.load(audio)

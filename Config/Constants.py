@@ -17,6 +17,8 @@ INPUT_TEXT = "Config/input/text"
 
 OUTPUT_AUDIO = "Config/output_audio/"
 
+LOGGER_PATH = "audio_classification/GTZAN_DB/loggers"
+
 # dataset paths
 
 GTZAN_AUDIO_PATH = "audio_classification/GTZAN_DB/Data/genres_original"
