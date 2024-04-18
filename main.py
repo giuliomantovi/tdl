@@ -24,7 +24,7 @@ if __name__ == '__main__':
     # efficientnet_model.testefficientnetmodel("Config/input/images", Constants.EFFICIENTNET_PRETRAINED_PATH)
     # spectrogram_models.testimagemodel(INPUT_IMAGES_CNN, CNN_IMAGE_PATH)
     # lda_model.predict_text()
-    # lda_model.create_model_chunks()
+    scratch_lda_model.create_model()
     # lda_model.predict_text()
     # compute_text_similarity("Config/input/text/rollingInTheDeepPop/vocals.txt", "Config/input/text/ringoffire/vocals.txt")
     # predict_genre_from_lyrics()

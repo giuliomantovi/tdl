@@ -24,7 +24,6 @@ def remove_invalid_lyrics(chunk, song_index):
     for i in range(song_index, song_index + len(chunk)):
         if language[i] != 'en':
             indexes.append(i - song_index)
-    song_index += len(chunk)
     chunk = chunk.drop(index=chunk.index[indexes])
     return chunk
 
@@ -33,23 +32,26 @@ def create_model():
     cont = 0
     data_words = []
     song_index = 0
+    chunksize = 10000
     for chunk in pd.read_csv(filepath_or_buffer=Constants.GENIUS_DATASET_PATH,
-                             engine='c', chunksize=100000, usecols=['lyrics', 'language']):
+                             engine='c', chunksize=chunksize, usecols=['lyrics', 'language']):
         if cont == 5:
             break
         print(chunk)
         cont += 1
-        chunk = remove_invalid_lyrics(chunk,song_index)
+        chunk = remove_invalid_lyrics(chunk, song_index)
+        song_index += chunksize
         lyrics = chunk['lyrics']
         data_words += [preprocess_text(text) for text in lyrics]
     # create_wordcloud(songs)
     # Create Dictionary
     id2word = corpora.Dictionary(data_words)
     id2word.filter_extremes()
+    print(id2word)
     # Create Corpus
     # Term Document Frequency
     corpus = [id2word.doc2bow(text) for text in data_words]
-
+    print(corpus)
     num_topics = 4
     # Build LDA model
     lda_model = gensim.models.ldamodel.LdaModel(corpus=corpus,
@@ -59,6 +61,9 @@ def create_model():
     pprint(lda_model.print_topics())
     #SAVE THE MODEL
     #lda_model.save(fname=Constants.SCRATCH_LDA_MODEL)
+    """with open('scratch_corpus.pickle', 'wb') as file:
+        # Serialize and save the object to the file
+        pickle.dump(corpus, file)"""
 
     # visualize_topics(lda_model, num_topics, corpus, id2word)
 
@@ -86,7 +91,8 @@ def compute_topic_distribution(file):
 
 def create_wordcloud(songs):
     # Join the different processed titles together.
-    long_string = ','.join(songs['lyrics_processed'].to_list())
+    #long_string = ','.join(songs['lyrics_processed'].to_list())
+    topic_words =
     # Create a WordCloud object
     wordcloud = WordCloud(background_color="white", max_words=5000, contour_width=3, contour_color='steelblue')
     # Generate a word cloud

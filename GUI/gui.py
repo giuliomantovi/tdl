@@ -140,38 +140,41 @@ class App(customtkinter.CTk):
 
         """AUDIO CLASSIFICATION TAB:    -   -   -   -   -   -   -   -   -   -   -   -"""
         # create radiobutton frame for ac
-        self.radiobutton_frame = customtkinter.CTkFrame(self.tabview.tab("Audio classification"))
-        self.radiobutton_frame.grid(row=0, column=0, padx=(20, 20), pady=(20, 5), sticky="nsew")
+        self.ac_radiobutton_frame = customtkinter.CTkFrame(self.tabview.tab("Audio classification"))
+        self.ac_radiobutton_frame.grid(row=0, column=0, padx=(20, 20), pady=(20, 5), sticky="nsew")
         """# HORIZONTAL GRID FOR RADIO BUTTONS(MODEL CHOICE) AND MODEL DESCRIPTIONS
         self.ac_models_grid = customtkinter.CTkFrame(master=self.sidebar_frame, corner_radius=0,
                                                      fg_color='transparent')
         self.ac_models_grid.grid(row=0, column=0, sticky="nsew")"""
         # inserting radiobuttons
         self.ac_model_selected = customtkinter.StringVar(value="LSTM")
-        self.label_radio_group = customtkinter.CTkLabel(master=self.radiobutton_frame, text="MODEL SELECTION",
-                                                        font=("Helvetica", 18))
-        self.label_radio_group.grid(row=0, column=0, columnspan=1, padx=10, pady=20, sticky="")
-        self.radio_button_lsmt = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="LSTM",
-                                                              variable=self.ac_model_selected, value="LSTM",
-                                                              command=self.pressed_radiobutton, font=("Helvetica", 16))
-        self.radio_button_lsmt.grid(row=1, column=0, pady=(5, 10), padx=20, sticky="w")
-        self.radio_button_cnn = customtkinter.CTkRadioButton(master=self.radiobutton_frame, text="CNN - mfcc",
-                                                             variable=self.ac_model_selected, value="CNN",
-                                                             command=self.pressed_radiobutton, font=("Helvetica", 16))
-        self.radio_button_cnn.grid(row=2, column=0, pady=15, padx=20, sticky="w")
-        self.radio_button_cnnspec = customtkinter.CTkRadioButton(master=self.radiobutton_frame,
-                                                                 text="CNN - spectrogram",
-                                                                 variable=self.ac_model_selected,
-                                                                 value="CNN spectrogram",
+        self.ac_label_radio_group = customtkinter.CTkLabel(master=self.ac_radiobutton_frame, text="MODEL SELECTION",
+                                                           font=("Helvetica", 18))
+        self.ac_label_radio_group.grid(row=0, column=0, columnspan=1, padx=10, pady=20, sticky="")
+        self.ac_radio_button_lsmt = customtkinter.CTkRadioButton(master=self.ac_radiobutton_frame, text="LSTM",
+                                                                 variable=self.ac_model_selected, value="LSTM",
                                                                  command=self.pressed_radiobutton,
                                                                  font=("Helvetica", 16))
-        self.radio_button_cnnspec.grid(row=3, column=0, pady=15, padx=20, sticky="w")
-        self.radio_button_effnet = customtkinter.CTkRadioButton(master=self.radiobutton_frame,
-                                                                text="EfficientNet (suggested)",
-                                                                variable=self.ac_model_selected, value="EfficientNet",
+        self.ac_radio_button_lsmt.grid(row=1, column=0, pady=(5, 10), padx=20, sticky="w")
+        self.ac_radio_button_cnn = customtkinter.CTkRadioButton(master=self.ac_radiobutton_frame, text="CNN - mfcc",
+                                                                variable=self.ac_model_selected, value="CNN",
                                                                 command=self.pressed_radiobutton,
                                                                 font=("Helvetica", 16))
-        self.radio_button_effnet.grid(row=4, column=0, pady=(15, 0), padx=20, sticky="w")
+        self.ac_radio_button_cnn.grid(row=2, column=0, pady=15, padx=20, sticky="w")
+        self.ac_radio_button_cnnspec = customtkinter.CTkRadioButton(master=self.ac_radiobutton_frame,
+                                                                    text="CNN - spectrogram",
+                                                                    variable=self.ac_model_selected,
+                                                                    value="CNN spectrogram",
+                                                                    command=self.pressed_radiobutton,
+                                                                    font=("Helvetica", 16))
+        self.ac_radio_button_cnnspec.grid(row=3, column=0, pady=15, padx=20, sticky="w")
+        self.ac_radio_button_effnet = customtkinter.CTkRadioButton(master=self.ac_radiobutton_frame,
+                                                                   text="EfficientNet (suggested)",
+                                                                   variable=self.ac_model_selected,
+                                                                   value="EfficientNet",
+                                                                   command=self.pressed_radiobutton,
+                                                                   font=("Helvetica", 16))
+        self.ac_radio_button_effnet.grid(row=4, column=0, pady=(15, 0), padx=20, sticky="w")
         # Images for models description
         # 662 x 480
         self.ac_images_size = (450, 270)
@@ -213,8 +216,25 @@ class App(customtkinter.CTk):
             self.ac_prediction_image.configure(image=ac_genres_image)
 
         """LYRICS CLASSIFICATION TAB:    -   -   -   -   -   -   -   -   -   -   -   -"""
-
-
+        self.lc_radiobutton_frame = customtkinter.CTkFrame(self.tabview.tab("Lyrics classification"))
+        self.lc_radiobutton_frame.grid(row=0, column=0, padx=(20, 20), pady=(20, 5), sticky="nsew")
+        # inserting radiobuttons
+        self.lc_model_selected = customtkinter.StringVar(value="Pretrained LDA")
+        self.lc_label_radio_group = customtkinter.CTkLabel(master=self.lc_radiobutton_frame, text="MODEL SELECTION",
+                                                           font=("Helvetica", 18))
+        self.lc_label_radio_group.grid(row=0, column=0, columnspan=1, padx=10, pady=20, sticky="")
+        self.lc_radio_button_pretr_lda = customtkinter.CTkRadioButton(master=self.lc_radiobutton_frame, text="Scratch LDA",
+                                                                      variable=self.ac_model_selected, value="LDA_scratch",
+                                                                      command=self.pressed_radiobutton,
+                                                                      font=("Helvetica", 16))
+        self.lc_radio_button_pretr_lda.grid(row=1, column=0, pady=(5, 10), padx=20, sticky="w")
+        self.lc_radio_button_scratch_lda = customtkinter.CTkRadioButton(master=self.lc_radiobutton_frame,
+                                                                        text="Pretrained LDA",
+                                                                        variable=self.ac_model_selected,
+                                                                        value="LDA",
+                                                                        command=self.pressed_radiobutton,
+                                                                        font=("Helvetica", 16))
+        self.lc_radio_button_scratch_lda.grid(row=2, column=0, pady=15, padx=20, sticky="w")
 
     def load_audios(self, new_dir_path):
         for root, subdirs, files in os.walk(new_dir_path):
