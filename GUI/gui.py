@@ -54,6 +54,7 @@ class App(customtkinter.CTk):
         # self.grid_columnconfigure((2, 3), weight=0)
         self.grid_rowconfigure((0, 1), weight=1)
 
+        # region left sidebar
         # LEFT SIDEBAR
         self.sidebar_frame = customtkinter.CTkFrame(self, width=150, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, rowspan=2, sticky="nsew")
@@ -127,6 +128,7 @@ class App(customtkinter.CTk):
         # LOADING OPERATIONS
         self.load_audios(os.path.abspath(join(os.getcwd(), '..', Constants.INPUT_AUDIO)))
         self.update_progressbar()
+        # endregion left sidebar
 
         # CREATE TABLEVIEW FOR 2ND PART OF THE APP
         self.tabview = customtkinter.CTkTabview(self, fg_color="transparent")
@@ -138,7 +140,12 @@ class App(customtkinter.CTk):
         # self.tabview.tab("Audio classification").grid_columnconfigure(0, weight=1)  # configure grid of individual tabs
         # self.tabview.tab("Tab 2").grid_columnconfigure(0, weight=1)
 
-        """AUDIO CLASSIFICATION TAB:    -   -   -   -   -   -   -   -   -   -   -   -"""
+        """
+        -----------------------------------------------------------------------------------------------------------
+                                        AUDIO CLASSIFICATION TAB
+        -----------------------------------------------------------------------------------------------------------
+        """
+        # region audio classification tab
         # create radiobutton frame for ac
         self.ac_radiobutton_frame = customtkinter.CTkFrame(self.tabview.tab("Audio classification"))
         self.ac_radiobutton_frame.grid(row=0, column=0, padx=(20, 20), pady=(20, 5), sticky="nsew")
@@ -153,26 +160,26 @@ class App(customtkinter.CTk):
         self.ac_label_radio_group.grid(row=0, column=0, columnspan=1, padx=10, pady=20, sticky="")
         self.ac_radio_button_lsmt = customtkinter.CTkRadioButton(master=self.ac_radiobutton_frame, text="LSTM",
                                                                  variable=self.ac_model_selected, value="LSTM",
-                                                                 command=self.pressed_radiobutton,
+                                                                 command=self.pressed_ac_radiobutton,
                                                                  font=("Helvetica", 16))
         self.ac_radio_button_lsmt.grid(row=1, column=0, pady=(5, 10), padx=20, sticky="w")
         self.ac_radio_button_cnn = customtkinter.CTkRadioButton(master=self.ac_radiobutton_frame, text="CNN - mfcc",
                                                                 variable=self.ac_model_selected, value="CNN",
-                                                                command=self.pressed_radiobutton,
+                                                                command=self.pressed_ac_radiobutton,
                                                                 font=("Helvetica", 16))
         self.ac_radio_button_cnn.grid(row=2, column=0, pady=15, padx=20, sticky="w")
         self.ac_radio_button_cnnspec = customtkinter.CTkRadioButton(master=self.ac_radiobutton_frame,
                                                                     text="CNN - spectrogram",
                                                                     variable=self.ac_model_selected,
                                                                     value="CNN spectrogram",
-                                                                    command=self.pressed_radiobutton,
+                                                                    command=self.pressed_ac_radiobutton,
                                                                     font=("Helvetica", 16))
         self.ac_radio_button_cnnspec.grid(row=3, column=0, pady=15, padx=20, sticky="w")
         self.ac_radio_button_effnet = customtkinter.CTkRadioButton(master=self.ac_radiobutton_frame,
                                                                    text="EfficientNet (suggested)",
                                                                    variable=self.ac_model_selected,
                                                                    value="EfficientNet",
-                                                                   command=self.pressed_radiobutton,
+                                                                   command=self.pressed_ac_radiobutton,
                                                                    font=("Helvetica", 16))
         self.ac_radio_button_effnet.grid(row=4, column=0, pady=(15, 0), padx=20, sticky="w")
         # Images for models description
@@ -214,55 +221,69 @@ class App(customtkinter.CTk):
         if os.path.exists(ac_selected_image):
             ac_genres_image = customtkinter.CTkImage(dark_image=Image.open(ac_selected_image), size=(256, 192))
             self.ac_prediction_image.configure(image=ac_genres_image)
+        # endregion audio classification tab
 
-        """LYRICS CLASSIFICATION TAB:    -   -   -   -   -   -   -   -   -   -   -   -"""
+        """
+        -----------------------------------------------------------------------------------------------------------
+                                        LYRICS CLASSIFICATION TAB
+        -----------------------------------------------------------------------------------------------------------
+        """
+        # region lyrics classification tab
+        #self.tabview.tab("Lyrics classification").grid_columnconfigure(1, weight=1)
+
         self.lc_radiobutton_frame = customtkinter.CTkFrame(self.tabview.tab("Lyrics classification"))
-        self.lc_radiobutton_frame.grid(row=0, column=0, padx=(20, 20), pady=(20, 5), sticky="nsew")
+        self.lc_radiobutton_frame.grid(row=0, column=0, padx=(20, 20), pady=(20, 20), sticky="nsew")
         # inserting radiobuttons
-        self.lc_model_selected = customtkinter.StringVar(value="Pretrained LDA")
+        self.lc_model_selected = customtkinter.StringVar(value="Scratch LDA")
         self.lc_label_radio_group = customtkinter.CTkLabel(master=self.lc_radiobutton_frame, text="MODEL SELECTION",
                                                            font=("Helvetica", 18))
         self.lc_label_radio_group.grid(row=0, column=0, columnspan=1, padx=10, pady=20, sticky="")
-        self.lc_radio_button_pretr_lda = customtkinter.CTkRadioButton(master=self.lc_radiobutton_frame, text="Scratch LDA",
-                                                                      variable=self.ac_model_selected, value="LDA_scratch",
-                                                                      command=self.pressed_radiobutton,
+        self.lc_radio_button_pretr_lda = customtkinter.CTkRadioButton(master=self.lc_radiobutton_frame,
+                                                                      text="Scratch LDA",
+                                                                      variable=self.lc_model_selected,
+                                                                      value="Scratch LDA",
+                                                                      command=self.pressed_lc_radiobutton,
                                                                       font=("Helvetica", 16))
         self.lc_radio_button_pretr_lda.grid(row=1, column=0, pady=(5, 10), padx=20, sticky="w")
         self.lc_radio_button_scratch_lda = customtkinter.CTkRadioButton(master=self.lc_radiobutton_frame,
                                                                         text="Pretrained LDA",
-                                                                        variable=self.ac_model_selected,
-                                                                        value="LDA",
-                                                                        command=self.pressed_radiobutton,
+                                                                        variable=self.lc_model_selected,
+                                                                        value="Pretrained LDA",
+                                                                        command=self.pressed_lc_radiobutton,
                                                                         font=("Helvetica", 16))
         self.lc_radio_button_scratch_lda.grid(row=2, column=0, pady=15, padx=20, sticky="w")
 
-    def load_audios(self, new_dir_path):
-        for root, subdirs, files in os.walk(new_dir_path):
-            for filename in files:
-                if filename == "vocals.wav" or filename == "accompaniment.wav":
-                    continue
-                new_filename = os.path.abspath(join(root, filename)).replace("\\", "/")
-                if filename.endswith(".wav") and new_filename not in self.audios_paths_list:
-                    self.audios_paths_list.append(new_filename)
-                    self.audios_names_list.append(filename[:-4])
-        if self.audios_names_list:
-            self.songs_combobox.configure(values=self.audios_names_list)
-            self.songs_combobox.set(self.audios_names_list[0])
-            self.change_lyrics()
+        # Scrollable frame for model topics
+        self.scrollable_frame = customtkinter.CTkScrollableFrame(self.tabview.tab("Lyrics classification"),
+                                                                 label_text="Topics")
+        self.scrollable_frame.grid(row=0, column=1, padx=(10, 10), pady=(20, 20), sticky="w")
+        self.scrollable_frame.grid_columnconfigure(0, weight=1)
+        self.scrollable_frame_buttons = []
+        for i in range(4):
+            button = customtkinter.CTkButton(master=self.scrollable_frame, text=f"Topic {i}")
+            button.grid(row=i, column=0, padx=10, pady=(0, 20))
+            self.scrollable_frame_buttons.append(button)
 
-    def select_file(self):
-        from audio_processing import general
-        files_list = filedialog.askopenfilenames()
-        root_dir = os.path.dirname(__file__)
-        new_dir_path = os.path.abspath(join(root_dir, '..', Constants.INPUT_AUDIO))
-        for audio in files_list:
-            new_audio_path = os.path.normpath(join(new_dir_path, audio.split("/")[-1]))
-            if not os.path.normpath(audio) == new_audio_path:
-                shutil.copy(audio, new_audio_path)
-        general.convert_to_wav(new_dir_path)
-        self.load_audios(new_dir_path)
+        # topic image
+        # Images for models description
+        # 662 x 480
+        self.ac_images_size = (250, 150)
+        self.lc_image = customtkinter.CTkImage(dark_image=Image.open(
+            "images/lc_models/scratch_lda/cloud_topic0.png"), size=self.ac_images_size)
+        # displaying initial model image
+        self.lc_topic_image = customtkinter.CTkLabel(master=self.tabview.tab("Lyrics classification"),
+                                                     image=self.lc_image, text="")
+        self.lc_topic_image.grid(row=0, column=2, padx=(15, 5), pady=(5, 5), sticky="w")
+        # endregion lyrics classification tab
 
-    def pressed_radiobutton(self):
+    """
+    -----------------------------------------------------------------------------------------------------------
+                                        AUDIO CLASSIFICATION FUNCTIONS
+    -----------------------------------------------------------------------------------------------------------
+    """
+
+    # region audio classification functions
+    def pressed_ac_radiobutton(self):
         match self.ac_model_selected.get():
             case "EfficientNet":
                 self.ac_model_image.configure(image=self.ac_effNet_image)
@@ -348,6 +369,55 @@ class App(customtkinter.CTk):
             plt.savefig(fname=os.path.join(self.audios_dir, "genre_predictions", filename) + ".png", format='png',
                         bbox_inches="tight", transparent=True)
         plt.clf()
+
+    # endregion audio classification functions
+
+    """
+    -----------------------------------------------------------------------------------------------------------
+                                        LYRICS CLASSIFICATION FUNCTIONS
+    -----------------------------------------------------------------------------------------------------------
+    """
+    # region lyrics classification functions
+    def pressed_lc_radiobutton(self):
+        match self.ac_model_selected.get():
+            case "Scratch LDA":
+                pass
+            case "Pretrained LDA":
+                pass
+    # endregion lyrics classification functions
+
+    """
+    -----------------------------------------------------------------------------------------------------------
+                                            MUSIC PLAYER FUNCTIONS
+    -----------------------------------------------------------------------------------------------------------
+    """
+
+    # region music player functions
+    def load_audios(self, new_dir_path):
+        for root, subdirs, files in os.walk(new_dir_path):
+            for filename in files:
+                if filename == "vocals.wav" or filename == "accompaniment.wav":
+                    continue
+                new_filename = os.path.abspath(join(root, filename)).replace("\\", "/")
+                if filename.endswith(".wav") and new_filename not in self.audios_paths_list:
+                    self.audios_paths_list.append(new_filename)
+                    self.audios_names_list.append(filename[:-4])
+        if self.audios_names_list:
+            self.songs_combobox.configure(values=self.audios_names_list)
+            self.songs_combobox.set(self.audios_names_list[0])
+            self.change_lyrics()
+
+    def select_file(self):
+        from audio_processing import general
+        files_list = filedialog.askopenfilenames()
+        root_dir = os.path.dirname(__file__)
+        new_dir_path = os.path.abspath(join(root_dir, '..', Constants.INPUT_AUDIO))
+        for audio in files_list:
+            new_audio_path = os.path.normpath(join(new_dir_path, audio.split("/")[-1]))
+            if not os.path.normpath(audio) == new_audio_path:
+                shutil.copy(audio, new_audio_path)
+        general.convert_to_wav(new_dir_path)
+        self.load_audios(new_dir_path)
 
     def handle_recording(self):
         if self.recording == 0:
@@ -492,6 +562,8 @@ class App(customtkinter.CTk):
         self.skip_b.configure(state="normal")
         self.skip_f.configure(state="normal")
         self.slider.configure(state="normal")
+
+    # endregion music player functions
 
 
 if __name__ == "__main__":

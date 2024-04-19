@@ -59,8 +59,8 @@ def create_model():
                                                 num_topics=num_topics)
     # Print the Keyword in the 4 topics
     pprint(lda_model.print_topics())
-    #SAVE THE MODEL
-    #lda_model.save(fname=Constants.SCRATCH_LDA_MODEL)
+    # SAVE THE MODEL
+    # lda_model.save(fname=Constants.SCRATCH_LDA_MODEL)
     """with open('scratch_corpus.pickle', 'wb') as file:
         # Serialize and save the object to the file
         pickle.dump(corpus, file)"""
@@ -89,16 +89,30 @@ def compute_topic_distribution(file):
         print("Error in calculating the 4 topics distribution")
 
 
-def create_wordcloud(songs):
-    # Join the different processed titles together.
-    #long_string = ','.join(songs['lyrics_processed'].to_list())
-    topic_words =
-    # Create a WordCloud object
-    wordcloud = WordCloud(background_color="white", max_words=5000, contour_width=3, contour_color='steelblue')
-    # Generate a word cloud
-    wordcloud.generate(long_string)
-    # Visualize the word cloud
-    wordcloud.to_image().save("Genius_song_lyrics_DB/lda_model/wordcloud.png")
+def create_wordcloud():
+    lda_model = gensim.models.ldamodel.LdaModel.load(Constants.SCRATCH_LDA_MODEL)
+    topic_list = lda_model.print_topics()
+    topic_num = 0
+    for topic in topic_list:
+        strings = topic[1].split("+")
+        words = []
+        freqs = []
+        text = ""
+        for string in strings:
+            freq = int(float(string.split("*")[0]) * 1000)
+            word = string.split("*")[1].replace('\"', '').replace(' ', '')
+            freqs.append(freq)
+            words.append(word)
+            word += " "
+            text += word * freq
+        wordcloud = WordCloud(background_color="white", max_words=500, contour_width=3, contour_color='steelblue')
+        wordcloud.collocations = False
+        wordcloud.generate(text)
+        save_path = os.path.join("GUI/images/lc_models/scratch_lda/", "cloud_topic" + str(topic_num) + ".png")
+        wordcloud.to_image().save(save_path)
+        topic_num += 1
+        # print(words)
+        # print(freqs)
 
 
 def visualize_topics(lda_model, num_topics, corpus, id2word):
