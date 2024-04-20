@@ -6,6 +6,7 @@ import pyLDAvis.gensim
 import pickle
 import pyLDAvis
 from lyrics_classification.text_processing import *
+import matplotlib.pyplot as plt
 
 
 def preprocess_text(text):
@@ -105,11 +106,20 @@ def create_wordcloud():
             words.append(word)
             word += " "
             text += word * freq
-        wordcloud = WordCloud(background_color="white", max_words=500, contour_width=3, contour_color='steelblue')
+        wordcloud = WordCloud(
+            background_color="rgba(255, 255, 255, 0)", mode="RGBA", max_words=50, contour_width=3,
+            contour_color='steelblue', width=250, height=250,
+            colormap='Set3')
         wordcloud.collocations = False
-        wordcloud.generate(text)
+        wc = wordcloud.generate(text)
+        plt.figure(frameon=False, figsize=(2.5, 2.5))
+        plt.imshow(wc)
+        plt.axis('off')
+        plt.title("Topic " + str(topic_num), fontsize=16, color="white")
+        #plt.show()
         save_path = os.path.join("GUI/images/lc_models/scratch_lda/", "cloud_topic" + str(topic_num) + ".png")
-        wordcloud.to_image().save(save_path)
+        #wordcloud.to_image().save(save_path)
+        plt.savefig(save_path)
         topic_num += 1
         # print(words)
         # print(freqs)

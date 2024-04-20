@@ -229,7 +229,7 @@ class App(customtkinter.CTk):
         -----------------------------------------------------------------------------------------------------------
         """
         # region lyrics classification tab
-        #self.tabview.tab("Lyrics classification").grid_columnconfigure(1, weight=1)
+        # self.tabview.tab("Lyrics classification").grid_columnconfigure(1, weight=1)
 
         self.lc_radiobutton_frame = customtkinter.CTkFrame(self.tabview.tab("Lyrics classification"))
         self.lc_radiobutton_frame.grid(row=0, column=0, padx=(20, 20), pady=(20, 20), sticky="nsew")
@@ -237,43 +237,46 @@ class App(customtkinter.CTk):
         self.lc_model_selected = customtkinter.StringVar(value="Scratch LDA")
         self.lc_label_radio_group = customtkinter.CTkLabel(master=self.lc_radiobutton_frame, text="MODEL SELECTION",
                                                            font=("Helvetica", 18))
-        self.lc_label_radio_group.grid(row=0, column=0, columnspan=1, padx=10, pady=20, sticky="")
-        self.lc_radio_button_pretr_lda = customtkinter.CTkRadioButton(master=self.lc_radiobutton_frame,
-                                                                      text="Scratch LDA",
-                                                                      variable=self.lc_model_selected,
-                                                                      value="Scratch LDA",
-                                                                      command=self.pressed_lc_radiobutton,
-                                                                      font=("Helvetica", 16))
-        self.lc_radio_button_pretr_lda.grid(row=1, column=0, pady=(5, 10), padx=20, sticky="w")
-        self.lc_radio_button_scratch_lda = customtkinter.CTkRadioButton(master=self.lc_radiobutton_frame,
-                                                                        text="Pretrained LDA",
-                                                                        variable=self.lc_model_selected,
-                                                                        value="Pretrained LDA",
-                                                                        command=self.pressed_lc_radiobutton,
-                                                                        font=("Helvetica", 16))
-        self.lc_radio_button_scratch_lda.grid(row=2, column=0, pady=15, padx=20, sticky="w")
+        self.lc_label_radio_group.grid(row=0, column=0, columnspan=1, padx=20, pady=20, sticky="")
+        self.lc_radio_button_scratch = customtkinter.CTkRadioButton(master=self.lc_radiobutton_frame,
+                                                                    text="Scratch LDA",
+                                                                    variable=self.lc_model_selected,
+                                                                    value="Scratch LDA",
+                                                                    command=self.pressed_lc_radiobutton,
+                                                                    font=("Helvetica", 16))
+        self.lc_radio_button_scratch.grid(row=1, column=0, pady=(5, 10), padx=20, sticky="w")
+        self.lc_radio_button_pre = customtkinter.CTkRadioButton(master=self.lc_radiobutton_frame,
+                                                                text="Pretrained LDA",
+                                                                variable=self.lc_model_selected,
+                                                                value="Pretrained LDA",
+                                                                command=self.pressed_lc_radiobutton,
+                                                                font=("Helvetica", 16))
+        self.lc_radio_button_pre.grid(row=2, column=0, pady=15, padx=20, sticky="w")
 
-        # Scrollable frame for model topics
-        self.scrollable_frame = customtkinter.CTkScrollableFrame(self.tabview.tab("Lyrics classification"),
-                                                                 label_text="Topics")
-        self.scrollable_frame.grid(row=0, column=1, padx=(10, 10), pady=(20, 20), sticky="w")
-        self.scrollable_frame.grid_columnconfigure(0, weight=1)
-        self.scrollable_frame_buttons = []
+        # Scrollable frame for scratch model topics
+        self.lc_scratch_scrollable_frame = customtkinter.CTkScrollableFrame(self.tabview.tab("Lyrics classification"),
+                                                                            label_text="SCRATCH MODEL TOPICS",
+                                                                            label_font=("Helvetica", 16))
+        self.lc_scratch_scrollable_frame.grid(row=0, column=1, padx=(10, 10), pady=(20, 20), sticky="w")
+        self.lc_scratch_scrollable_frame.grid_columnconfigure(0, weight=1)
+        self.lc_scratch_scrollable_frame_buttons = []
+        # creating buttons for scratch model
         for i in range(4):
-            button = customtkinter.CTkButton(master=self.scrollable_frame, text=f"Topic {i}")
+            button = customtkinter.CTkButton(master=self.lc_scratch_scrollable_frame, text=f"Topic {i}", command=lambda
+                m=("scratch_lda," + str(i)): self.pressed_lc_sliderbutton(m))
             button.grid(row=i, column=0, padx=10, pady=(0, 20))
-            self.scrollable_frame_buttons.append(button)
+            self.lc_scratch_scrollable_frame_buttons.append(button)
 
         # topic image
         # Images for models description
         # 662 x 480
-        self.ac_images_size = (250, 150)
+        self.lc_images_size = (270, 270)
         self.lc_image = customtkinter.CTkImage(dark_image=Image.open(
-            "images/lc_models/scratch_lda/cloud_topic0.png"), size=self.ac_images_size)
+            "images/lc_models/scratch_lda/cloud_topic0.png"), size=self.lc_images_size)
         # displaying initial model image
         self.lc_topic_image = customtkinter.CTkLabel(master=self.tabview.tab("Lyrics classification"),
                                                      image=self.lc_image, text="")
-        self.lc_topic_image.grid(row=0, column=2, padx=(15, 5), pady=(5, 5), sticky="w")
+        self.lc_topic_image.grid(row=0, column=2, padx=(0, 0), pady=(15, 5), sticky="w")
         # endregion lyrics classification tab
 
     """
@@ -377,13 +380,46 @@ class App(customtkinter.CTk):
                                         LYRICS CLASSIFICATION FUNCTIONS
     -----------------------------------------------------------------------------------------------------------
     """
+
     # region lyrics classification functions
     def pressed_lc_radiobutton(self):
-        match self.ac_model_selected.get():
+        match self.lc_model_selected.get():
             case "Scratch LDA":
-                pass
+                self.lc_scratch_scrollable_frame = customtkinter.CTkScrollableFrame(
+                    self.tabview.tab("Lyrics classification"),
+                    label_text="SCRATCH MODEL TOPICS",
+                    label_font=("Helvetica", 16))
+                self.lc_scratch_scrollable_frame.grid(row=0, column=1, padx=(10, 10), pady=(20, 20), sticky="w")
+                self.lc_scratch_scrollable_frame.grid_columnconfigure(0, weight=1)
+                # creating buttons for scratch model
+                for i in range(4):
+                    button = customtkinter.CTkButton(master=self.lc_scratch_scrollable_frame, text=f"Topic {i}",
+                                                     command=lambda
+                                                         m=("scratch_lda," + str(i)): self.pressed_lc_sliderbutton(m))
+                    button.grid(row=i, column=0, padx=10, pady=(0, 20))
             case "Pretrained LDA":
-                pass
+                self.lc_pre_scrollable_frame = customtkinter.CTkScrollableFrame(
+                    self.tabview.tab("Lyrics classification"),
+                    label_text="PRE. MODEL TOPICS",
+                    label_font=("Helvetica", 16))
+                self.lc_pre_scrollable_frame.grid(row=0, column=1, padx=(10, 10), pady=(20, 20), sticky="w")
+                self.lc_pre_scrollable_frame.grid_columnconfigure(0, weight=1)
+                self.lc_pre_scrollable_frame_buttons = []
+                # creating buttons for scratch model
+                for i in range(60):
+                    button = customtkinter.CTkButton(master=self.lc_pre_scrollable_frame, text=f"Topic {i}",
+                                                     command=lambda
+                                                         m=("scratch_lda," + str(i)): self.pressed_lc_sliderbutton(m))
+                    button.grid(row=i, column=0, padx=10, pady=(0, 20))
+                    self.lc_pre_scrollable_frame_buttons.append(button)
+
+    def pressed_lc_sliderbutton(self, details):
+        model, topic = details.split(",")
+        print(model)
+        print(topic)
+        self.lc_image.configure(dark_image=Image.open(
+            "images/lc_models/" + str(model) + "/cloud_topic" + str(topic) + ".png"))
+
     # endregion lyrics classification functions
 
     """
