@@ -22,9 +22,9 @@ def fast_transcript(dir_path):
             for filename in files:
                 try:
                     transcribed_filename = os.path.join(root, filename[:-4]) + ".txt"
-                    print("Transcribed filename: " + transcribed_filename)
                     #if filename == "vocals.wav":
                     if filename.endswith(".wav") and not os.path.exists(transcribed_filename):
+                        print("Transcribed filename: " + transcribed_filename)
                         # do not transcribe if already transcribed or if source separation dir already present (transcription previosly failed)
                         #if os.path.exists(transcribed_filename) or os.path.exists(os.path.join(root, filename[:-4])):
                         #    continue

@@ -136,7 +136,7 @@ class App(customtkinter.CTk):
         self.tabview.grid(row=0, column=1, rowspan=2, padx=(15, 15), pady=(5, 5), sticky="nsew")
         self.tabview.add("Audio classification")
         self.tabview.add("Lyrics classification")
-        self.tabview.add("Songs similarity")
+        #self.tabview.add("Songs similarity")
         # self.tabview.tab("Audio classification").grid_columnconfigure(0, weight=1)  # configure grid of individual tabs
         # self.tabview.tab("Tab 2").grid_columnconfigure(0, weight=1)
 
@@ -277,6 +277,33 @@ class App(customtkinter.CTk):
         self.lc_topic_image = customtkinter.CTkLabel(master=self.tabview.tab("Lyrics classification"),
                                                      image=self.lc_image, text="")
         self.lc_topic_image.grid(row=0, column=2, padx=(0, 0), pady=(15, 5), sticky="w")
+
+        # SONG CHOICE LABEL AND COMBOBOX 2
+        self.lc_songs_label = customtkinter.CTkLabel(master=self.tabview.tab("Lyrics classification"),
+                                                     text="SONG GENRE PREDICTION", font=("Helvetica", 18))
+        self.lc_songs_label.grid(row=1, column=0, padx=(5, 5), pady=(20, 5))
+        self.lc_songs_combobox = customtkinter.CTkComboBox(master=self.tabview.tab("Lyrics classification"),
+                                                           state="readonly", values=self.audios_names_list,
+                                                           font=("Helvetica", 16), command=self.lc_change_song)
+        self.lc_songs_combobox.grid(row=2, column=0, padx=10, pady=(35, 35))
+        if self.audios_paths_list:
+            self.lc_songs_combobox.set(self.audios_names_list[0])
+        # TOPIC PREDICTION BUTTON AND IMAGE
+        self.lc_predict_button = customtkinter.CTkButton(master=self.tabview.tab("Lyrics classification"),
+                                                         text="Create topic predictions",
+                                                         command=self.lc_predict_topic,
+                                                         font=("Helvetica", 16))
+        self.lc_predict_button.grid(row=3, column=0, padx=10, pady=(15, 5))
+        self.lc_prediction_image = customtkinter.CTkLabel(master=self.tabview.tab("Lyrics classification"),
+                                                          image=None, text="")
+        self.lc_prediction_image.grid(row=1, column=1, rowspan=3, columnspan=2, padx=(0, 0), pady=(20, 0), sticky="n")
+        lc_selected_song = self.lc_songs_combobox.get()
+        lc_selected_image = join(self.audios_dir, "topic_predictions", lc_selected_song) + ".png"
+        if os.path.exists(lc_selected_image):
+            lc_genres_image = customtkinter.CTkImage(dark_image=Image.open(lc_selected_image), size=(256, 192))
+            self.lc_prediction_image.configure(image=lc_genres_image)
+
+
         # endregion lyrics classification tab
 
     """
@@ -303,38 +330,39 @@ class App(customtkinter.CTk):
         self.ac_prediction_image.configure(image=ac_genres_image)
 
     def ac_predict_genre(self):
-        from audio_classification import general
         self.ac_prediction_image.configure(image='')
         self.ac_prediction_image.configure(text="Loading...")
         self.ac_prediction_image.update()
-
+        self.ac_predict_button.configure(state="DISABLED")
+        from audio_classification.general import audio_to_spectrograms
         model = self.ac_model_selected.get()
-        genres = percentages = []
+        genres = []
+        percentages = []
         match model:
             case "EfficientNet":
-                from audio_classification import efficientnet_model
+                from audio_classification.efficientnet_model import testefficientnetmodel
                 print("effnet")
-                general.audio_to_spectrograms(self.audios_dir, "EffNet")
+                audio_to_spectrograms(self.audios_dir, "EffNet")
                 model_path = os.path.abspath(join(os.getcwd(), '..', Constants.EFFICIENTNET_PRETRAINED_PATH))
                 images_path = join(self.audios_dir, "effnet_spec")
-                genres, percentages = efficientnet_model.testefficientnetmodel(images_path, model_path)
+                genres, percentages = testefficientnetmodel(images_path, model_path)
             case "CNN spectrogram":
-                from audio_classification import spectrogram_models
+                from audio_classification.spectrogram_models import testimagemodel
                 print("CNN IMAGE")
-                general.audio_to_spectrograms(self.audios_dir, "cnn")
+                audio_to_spectrograms(self.audios_dir, "cnn")
                 model_path = os.path.abspath(join(os.getcwd(), '..', Constants.CNN_IMAGE_PATH))
                 images_path = join(self.audios_dir, "cnn_spec")
-                genres, percentages = spectrogram_models.testimagemodel(images_path, model_path)
+                genres, percentages = testimagemodel(images_path, model_path)
             case "CNN" | "LSTM":
-                from audio_classification import mfcc_models
+                from audio_classification.mfcc_models import testaudiomodel, preprocess_dir
                 print("CNN/LSMT")
-                data = mfcc_models.preprocess_dir(self.audios_dir)
+                data = preprocess_dir(self.audios_dir)
                 if model == "CNN":
                     model_path = Constants.CNN_PATH
                 else:
                     model_path = Constants.LSMT_PATH
                 model_path = os.path.abspath(join(os.getcwd(), '..', model_path))
-                genres, percentages = mfcc_models.testaudiomodel(data, model_path)
+                genres, percentages = testaudiomodel(data, model_path)
             case _:
                 print("Unknown error, change model")
         print(" GENRES: ")
@@ -409,7 +437,7 @@ class App(customtkinter.CTk):
                 for i in range(60):
                     button = customtkinter.CTkButton(master=self.lc_pre_scrollable_frame, text=f"Topic {i}",
                                                      command=lambda
-                                                         m=("scratch_lda," + str(i)): self.pressed_lc_sliderbutton(m))
+                                                         m=("pretrained_lda," + str(i)): self.pressed_lc_sliderbutton(m))
                     button.grid(row=i, column=0, padx=10, pady=(0, 20))
                     self.lc_pre_scrollable_frame_buttons.append(button)
 
@@ -420,6 +448,82 @@ class App(customtkinter.CTk):
         self.lc_image.configure(dark_image=Image.open(
             "images/lc_models/" + str(model) + "/cloud_topic" + str(topic) + ".png"))
 
+    def lc_change_song(self, choice):
+        selected_image = join(self.audios_dir, "topic_predictions", choice) + ".png"
+        lc_topic_image = customtkinter.CTkImage(dark_image=Image.open(selected_image), size=(256, 192))
+        self.lc_prediction_image.configure(image=lc_topic_image)
+
+    def lc_predict_topic(self):
+        self.lc_prediction_image.configure(image='')
+        self.lc_prediction_image.configure(text="Loading...")
+        self.lc_prediction_image.update()
+        self.lc_predict_button.configure(state="DISABLED")
+        from lyrics_classification.lda_models.pretrained_lda_model import compute_topic_distribution as ctd_pre
+        from lyrics_classification.lda_models.scratch_lda_model import compute_topic_distribution as ctd_scratch
+        model = self.lc_model_selected.get()
+        lyrics_files = []
+        for audio in self.audios_names_list:
+            lyrics_files.append(join(self.audios_dir, audio + ".txt"))
+        print(lyrics_files)
+        topics = []
+        percentages = []
+        match model:
+            case "Scratch LDA":
+                print("scratch")
+                for file in lyrics_files:
+                    top, perc = ctd_scratch(file)
+                    topics.append(top)
+                    percentages.append(perc)
+
+            case "Pretrained LDA":
+                print("Pretrained")
+                for file in lyrics_files:
+                    top, perc = ctd_pre(file)
+                    topics.append(top)
+                    percentages.append(perc)
+            case _:
+                print("Unknown error, change model")
+        print(" TOPICS: ")
+        print(topics)
+        print("PERC: ")
+        print(percentages)
+        print(model)
+        self.lc_create_predictions_plot(model, topics, percentages)
+        self.lc_prediction_image.configure(text="")
+        self.lc_change_song(self.lc_songs_combobox.get())
+        self.lc_predict_button.configure(state="normal")
+        # plt.show()
+
+    def lc_create_predictions_plot(self, model, topics, percentages):
+        color = 'white'
+        plt.rcParams['text.color'] = color
+        plt.rcParams['axes.edgecolor'] = color
+        plt.rcParams['axes.labelcolor'] = color
+        plt.rcParams['xtick.color'] = color
+        plt.rcParams['ytick.color'] = color
+        plt.rcParams['font.size'] = 22
+        model = model.split(' ')[0]
+
+        for i in range(len(topics)):
+            plt.clf()
+            x = np.array(topics[i])
+            xstrings = []
+            for num in x:
+                xstrings.append(str(num))
+            y = np.array(percentages[i])
+            filename = self.audios_names_list[i]
+            print(filename)
+            plt.ylabel("probability")
+            plt.xlabel("topic")
+            plt.yticks([])
+            plt.title(filename + " " + model)
+            plt.bar(xstrings, y, width=0.6, align='center')
+            """plt.ylim(0, 1)
+            if len(topics[i]) == 1:
+                plt.xlim(-1, 1)"""
+            plt.savefig(fname=os.path.join(self.audios_dir, "topic_predictions", filename) + ".png", format='png',
+                        bbox_inches="tight", transparent=True)
+        plt.clf()
     # endregion lyrics classification functions
 
     """

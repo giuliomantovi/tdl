@@ -7,6 +7,7 @@ import pickle
 import pyLDAvis
 from lyrics_classification.text_processing import *
 import matplotlib.pyplot as plt
+from lyrics_classification.lda_models import general
 
 
 def preprocess_text(text):
@@ -78,14 +79,14 @@ def compute_topic_distribution(file):
     try:
         lda_model = gensim.models.ldamodel.LdaModel.load(Constants.SCRATCH_LDA_MODEL)
         id2word = corpora.Dictionary.load(Constants.SCRATCH_LDA_DICTIONARY)
-
         with open(file) as f:
             song_text = f.read()
 
         data_words = [preprocess_text(song_text)]
-        print(data_words)
+        #print(data_words)
         corpus = [id2word.doc2bow(text) for text in data_words]
-        print('\n', lda_model[corpus][0])
+        #print('\n', lda_model[corpus][0])
+        return general.four_highest_topics(lda_model[corpus][0], "scratch")
     except:
         print("Error in calculating the 4 topics distribution")
 

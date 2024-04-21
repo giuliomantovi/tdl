@@ -26,7 +26,7 @@ if __name__ == '__main__':
     # lda_model.predict_text()
 
 
-    pretrained_lda_model.create_wordcloud()
+    pretrained_lda_model.compute_topic_distribution("C:/Users/Utente/UNI/tesina_LAUREA/Config/input/user/audio/loveCallBlues.txt")
 
 
     # lda_model.predict_text()

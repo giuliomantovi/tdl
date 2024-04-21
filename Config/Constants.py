@@ -31,11 +31,11 @@ GENIUS_DATASET_PATH = "lyrics_classification/Genius_song_lyrics_DB/song_lyrics.c
 
 WHISPER_MODELS = "../audio_processing/whisper_models"
 
-SCRATCH_LDA_MODEL = "lyrics_classification/Genius_song_lyrics_DB/lda_model/lda_mod"
-SCRATCH_LDA_DICTIONARY = "lyrics_classification/Genius_song_lyrics_DB/lda_model/lda_mod.id2word"
+SCRATCH_LDA_MODEL = "../lyrics_classification/Genius_song_lyrics_DB/lda_model/lda_mod"
+SCRATCH_LDA_DICTIONARY = "../lyrics_classification/Genius_song_lyrics_DB/lda_model/lda_mod.id2word"
 
-WASABI_LDA_MODEL = "lyrics_classification/WASABI_DB/topics/lda_model_16.jl"
-WASABI_LDA_DICTIONARY = "lyrics_classification/WASABI_DB/topics/dictionary.pickle"
+WASABI_LDA_MODEL = "../lyrics_classification/WASABI_DB/topics/lda_model_16.jl"
+WASABI_LDA_DICTIONARY = "../lyrics_classification/WASABI_DB/topics/dictionary.pickle"
 
 LSMT_PATH = "audio_classification/GTZAN_DB/models/LSTM.h5"
 

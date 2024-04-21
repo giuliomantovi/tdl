@@ -5,7 +5,7 @@ from lyrics_classification.text_processing import *
 import matplotlib.pyplot as plt
 import os
 from wordcloud import WordCloud
-
+from lyrics_classification.lda_models import general
 
 def compute_topic_distribution(file):
     # Compute topic distribution for unseen texts using WASABI LDA_MODEL AND DICTIONARY###
@@ -19,26 +19,28 @@ def compute_topic_distribution(file):
     # dictionary = Dictionary(corpus)
     # dictionary.filter_extremes()   ### using this will filter out all words if your corpus is very small
     corpus_bow = [dictionary.doc2bow(text) for text in corpus]
-    print(corpus_bow)
+    #print(corpus_bow)
     for text in corpus_bow:
-        print('\n', topic_model[text])
+        result = topic_model[text]
+        #print('\n', result)
+        return general.four_highest_topics(result, "pretrained")
 
 
 def complex_preprocess(corpus):
     t = time()
     unigrams = list(map(lambda text: simple_preprocess(text, min_len=1, max_len=100), corpus))
-    print('Extracted', len(set(flatten_list(unigrams))), 'unigrams:', time() - t, '\t', unigrams[0][:10])
+    #print('Extracted', len(set(flatten_list(unigrams))), 'unigrams:', time() - t, '\t', unigrams[0][:10])
     bigram_model = Phraser(Phrases(unigrams))
     unigrams_bigrams = [bigram_model[text] for text in unigrams]
     del unigrams
-    print('Extracted', len(set(flatten_list(unigrams_bigrams))), 'uni/bigrams:', time() - t, '\t',
-          [b for b in unigrams_bigrams[0] if '_' in b][:10])
+    #print('Extracted', len(set(flatten_list(unigrams_bigrams))), 'uni/bigrams:', time() - t, '\t',
+    #      [b for b in unigrams_bigrams[0] if '_' in b][:10])
     spacy_nlp = en_core_web_sm.load()
     # spacy_nlp = spacy.load("en_core_web_sm", disable=['parser', 'ner'])
     lemmatized_tokens = lemmatization(spacy_nlp, unigrams_bigrams, allowed_postags=['NOUN', 'ADJ', 'VERB', 'ADV'])
     del spacy_nlp
     del unigrams_bigrams
-    print('Extracted', len(set(flatten_list(lemmatized_tokens))), 'lemmas:', time() - t, '\t', lemmatized_tokens[0])
+    #print('Extracted', len(set(flatten_list(lemmatized_tokens))), 'lemmas:', time() - t, '\t', lemmatized_tokens[0])
     return lemmatized_tokens
 
 
@@ -137,7 +139,7 @@ def create_wordcloud():
         #plt.show()
         save_path = os.path.join("GUI/images/lc_models/pretrained_lda/", "cloud_topic" + str(topic_num) + ".png")
         #wordcloud.to_image().save(save_path)
-        plt.savefig(save_path)
+        #plt.savefig(save_path)
         topic_num += 1
         plt.close()
         print(words)
